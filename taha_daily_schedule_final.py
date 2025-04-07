@@ -87,10 +87,12 @@ st.markdown("""
             font-weight: 500;
             font-size: 1.1rem;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
         .task-done {
             background-color: #007f5f !important;
             color: white !important;
+            pointer-events: none;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -98,7 +100,6 @@ st.markdown("""
 st.markdown('<div class="title">Your Weekly Plan</div>', unsafe_allow_html=True)
 
 selected_day = st.selectbox("Choose a day:", days)
-
 tasks = weekly_plan[selected_day]
 
 # مقداردهی اولیه
@@ -108,31 +109,41 @@ if selected_day not in saved_status_data:
 # کپی برای تغییرات موقت
 if "temp_status" not in st.session_state:
     st.session_state.temp_status = {}
-
 if selected_day not in st.session_state.temp_status:
     st.session_state.temp_status[selected_day] = saved_status_data[selected_day][:]
 
 # نمایش تسک‌ها
 for i, task in enumerate(tasks):
-    task_key = f"{selected_day}_{i}"
     if st.session_state.temp_status[selected_day][i]:
         st.markdown(f'<div class="task-box task-done">{task}</div>', unsafe_allow_html=True)
     else:
-        if st.button(task, key=task_key):
+        if st.button(f"✔️ {task}", key=f"{selected_day}_{i}"):
             st.session_state.temp_status[selected_day][i] = True
             st.rerun()
-        else:
-            st.markdown(f'<div class="task-box">{task}</div>', unsafe_allow_html=True)
 
-# دکمه‌های Apply و Reset
-col1, col2 = st.columns(2)
-with col1:
-    if st.button("✅ Apply"):
+# --- نوت‌گذاری برای هر روز ---
+st.markdown("### Notes")
+note_key = f"{selected_day}_note"
+if note_key not in saved_status_data:
+    saved_status_data[note_key] = ""
+
+note_text = st.text_area("Write your daily report or notes here:", value=saved_status_data[note_key], height=150)
+
+# --- دکمه‌های Apply و Reset ---
+with st.form(key="action_form"):
+    col1, col2 = st.columns(2)
+    with col1:
+        apply_click = st.form_submit_button(label="✅ Apply")
+    with col2:
+        reset_click = st.form_submit_button(label="❌ Reset")
+
+    if apply_click:
         saved_status_data[selected_day] = st.session_state.temp_status[selected_day][:]
+        saved_status_data[note_key] = note_text
         with open(DATA_FILE, "w") as f:
             json.dump(saved_status_data, f)
-        st.success("Changes applied and saved!")
-with col2:
-    if st.button("❌ Reset"):
+        st.success("Changes and note saved!")
+
+    if reset_click:
         st.session_state.temp_status[selected_day] = [False] * len(tasks)
         st.rerun()
