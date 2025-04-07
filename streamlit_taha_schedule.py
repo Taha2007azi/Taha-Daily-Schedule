@@ -1,148 +1,65 @@
 import streamlit as st
 import json
 import os
+from datetime import datetime
 
-st.set_page_config(page_title="Taha's Daily Schedule", layout="centered")
+st.set_page_config(page_title="Taha Daily Schedule", layout="wide")
 
-# Path to save data
-DATA_FILE = "saved_schedule.json"
+DATA_FILE = "taha_schedule_data.json"
 
-# Load data from file
+# Load existing data or create new
 if os.path.exists(DATA_FILE):
     with open(DATA_FILE, "r") as f:
-        saved_data = json.load(f)
+        schedule_data = json.load(f)
 else:
-    saved_data = {}
+    schedule_data = {}
 
-# Define colors for each day
-colors = {
-    "Saturday": "#1E2A38",
-    "Sunday": "#2C3E50",
-    "Monday": "#34495E",
-    "Tuesday": "#22313F",
-    "Wednesday": "#1F3A3D",
-    "Thursday": "#2E4053",
-    "Friday": "#4A3F35"
-}
+days = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+time_blocks = ["5-6", "6-7", "7-8", "8-9", "9-10", "10-11", "11-12", "12-13", "13-14", "14-15", "15-16", "16-17", "17-18", "18-19", "19-20", "20-21", "21-22", "22-23"]
 
-# Sample weekly schedule
-weekly_schedule = {
-    "Saturday": [
-        ("5:00 – 5:30", "Mind Release"),
-        ("5:30 – 6:00", "Workout"),
-        ("6:00 – 7:30", "English"),
-        ("8:00 – 15:00", "School"),
-        ("15:00 – 16:00", "Rest"),
-        ("16:00 – 23:00", "Exam Study + Lunch Breaks")
-    ],
-    "Sunday": [
-        ("5:00 – 5:30", "Mind Release"),
-        ("5:30 – 6:00", "Workout"),
-        ("6:00 – 7:30", "English"),
-        ("8:00 – 15:00", "School"),
-        ("15:00 – 16:00", "Rest"),
-        ("16:00 – 23:00", "Language Class")
-    ],
-    "Monday": [
-        ("5:00 – 5:30", "Mind Release"),
-        ("5:30 – 6:00", "Workout"),
-        ("6:00 – 7:30", "English"),
-        ("8:00 – 23:00", "10hr Exam Study")
-    ],
-    "Tuesday": [
-        ("5:00 – 5:30", "Mind Release"),
-        ("5:30 – 6:00", "Workout"),
-        ("6:00 – 7:30", "English"),
-        ("8:00 – 15:00", "School"),
-        ("15:00 – 16:00", "Rest"),
-        ("16:00 – 23:00", "Language Class")
-    ],
-    "Wednesday": [
-        ("5:00 – 5:30", "Mind Release"),
-        ("5:30 – 6:00", "Workout"),
-        ("6:00 – 7:30", "English"),
-        ("8:00 – 23:00", "10hr Exam Study")
-    ],
-    "Thursday": [
-        ("8:00 – 8:30", "Mind Release"),
-        ("8:30 – 9:00", "Workout"),
-        ("9:00 – 10:30", "English"),
-        ("10:30 – 23:00", "10hr Exam Study")
-    ],
-    "Friday": [
-        ("5:00 – 5:30", "Mind Release"),
-        ("5:30 – 6:00", "Workout"),
-        ("6:00 – 7:30", "English"),
-        ("8:00 – 18:00", "Coding Class"),
-        ("18:00 – 21:00", "Review")
-    ]
-}
+selected_day = st.selectbox("Select Day", days)
+if selected_day not in schedule_data:
+    schedule_data[selected_day] = {}
 
-# Title and subtitle
-st.markdown("<h1 style='text-align: center; color: #F39C12;'>Taha's Daily Schedule</h1>", unsafe_allow_html=True)
-st.markdown("<h4 style='text-align: center; color: #BDC3C7;'>Crush your goals!</h4>", unsafe_allow_html=True)
+st.markdown(f"### {selected_day}'s Schedule")
 
-# Select day
-selected_day = st.selectbox("Select Day:", list(weekly_schedule.keys()))
+for idx, time_slot in enumerate(time_blocks):
+    task_key = f"{selected_day}_{time_slot}"
+    task_data = schedule_data[selected_day].get(time_slot, {"text": "", "check1": False, "check2": False, "note": ""})
 
-# Background style
-st.markdown(
-    f"""
-    <style>
-        .stApp {{
-            background-color: {colors[selected_day]};
-            color: #ECF0F1;
-            font-family: 'Tahoma', sans-serif;
-        }}
-        .task-complete {{
-            background-color: #27ae60 !important;
-            padding: 10px;
-            border-radius: 8px;
-        }}
-        .task-block {{
-            background-color: rgba(255, 255, 255, 0.07);
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }}
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+    # Determine background color
+    base_color = "#F2F2F2"  # default
+    if task_data["check2"]:
+        base_color = "#FFD700"  # gold for full completion
+    elif task_data["check1"]:
+        base_color = "#ADD8E6"  # light blue for first check
 
-st.subheader(f"Schedule for {selected_day}")
+    with st.container():
+        st.markdown(
+            f"""
+            <div style='background-color: {base_color}; padding: 10px; border-radius: 8px; margin-bottom: 10px;'>
+                <strong>{time_slot}</strong>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-# Display tasks
-for idx, (time_slot, default_task) in enumerate(weekly_schedule[selected_day]):
-    task_key = f"{selected_day}_{idx}"
-    task_data = saved_data.get(task_key, {"task": default_task, "done": 0, "note": ""})
+        col1, col2, col3 = st.columns([3, 1, 1])
+        with col1:
+            text = st.text_input(f"Task for {time_slot}", value=task_data["text"], key=f"text_{task_key}")
+        with col2:
+            check1 = st.checkbox("✔️ Start", value=task_data["check1"], key=f"check1_{task_key}")
+        with col3:
+            check2 = st.checkbox("✅ Done", value=task_data["check2"], key=f"check2_{task_key}")
 
-    st.markdown("---")
-    block_class = "task-block" if task_data["done"] < 2 else "task-complete"
-    st.markdown(f"<div class='{block_class}'>", unsafe_allow_html=True)
+        note = st.text_area("Note", value=str(task_data.get("note", "")), height=50, key=f"note_{task_key}")
 
-    cols = st.columns([1, 3, 4])
-    with cols[0]:
-        st.markdown(f"**{time_slot}**")
-    with cols[1]:
-        task = st.text_input("Task", value=task_data["task"], key=f"task_{task_key}")
-        done = st.checkbox("Done?", value=(task_data["done"] > 0), key=f"done_{task_key}")
-    with cols[2]:
-        note = st.text_area("Note", value=task_data["note"], height=50, key=f"note_{task_key}")
+    # Update and save only if second checkbox is checked
+    task_data.update({"text": text, "check1": check1, "check2": check2, "note": note})
+    schedule_data[selected_day][time_slot] = task_data
 
-    # Update status
-    current_done = 0
-    if done:
-        current_done = task_data["done"] + 1 if task_data["done"] < 2 else 2
-
-    # Save only if done twice
-    if current_done == 2:
-        saved_data[task_key] = {
-            "task": task,
-            "done": current_done,
-            "note": note
-        }
+    if check2:
         with open(DATA_FILE, "w") as f:
-            json.dump(saved_data, f)
+            json.dump(schedule_data, f)
 
-    st.markdown("</div>", unsafe_allow_html=True)
+st.success("Daily Schedule Loaded. Changes save when second checkbox is ticked.")
