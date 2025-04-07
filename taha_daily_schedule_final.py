@@ -5,13 +5,16 @@ import tempfile
 
 st.set_page_config(page_title="Taha's Daily Schedule", layout="centered")
 
-# Safe file path for Streamlit Cloud
+# Save path (safe for Streamlit Cloud)
 SAVE_FILE = os.path.join(tempfile.gettempdir(), "schedule_state.json")
 
 # Load saved state if exists
 if os.path.exists(SAVE_FILE):
     with open(SAVE_FILE, "r") as f:
-        saved_state = json.load(f)
+        try:
+            saved_state = json.load(f)
+        except json.JSONDecodeError:
+            saved_state = {}
 else:
     saved_state = {}
 
