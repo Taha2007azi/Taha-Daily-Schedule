@@ -1,65 +1,57 @@
 import streamlit as st
-from datetime import datetime
 
-# رنگ‌ها
-COLOR_PENDING = "#1E3A8A"       # آبی تیره
-COLOR_CHECKED = "#10B981"       # سبز خفن
+# ---------- Settings ----------
+st.set_page_config(page_title="Taha's Daily Planner", layout="wide")
 
-# برنامه‌ریزی روزانه
-weekly_schedule = {
-    "Saturday": ["8:00-9:00 - Task A", "9:00-10:00 - Task B"],
-    "Sunday": ["8:00-9:00 - Task C", "9:00-10:00 - Task D"],
-    "Monday": ["8:00-9:00 - Task E", "9:00-10:00 - Task F"],
-    "Tuesday": ["8:00-9:00 - Task G", "9:00-10:00 - Task H"],
-    "Wednesday": ["8:00-9:00 - Task I", "9:00-10:00 - Task J"],
-    "Thursday": ["8:00-9:00 - Task K", "9:00-10:00 - Task L"],
-    "Friday": ["8:00-9:00 - Task M", "9:00-10:00 - Task N"],
+# ---------- Styling ----------
+st.markdown("""
+    <style>
+        body { background-color: #0f172a; color: white; }
+        .title { font-size: 32px; font-weight: bold; color: #22d3ee; margin-bottom: 20px; }
+        .motivation { font-size: 20px; color: #4ade80; margin-bottom: 30px; }
+        .task-box { background-color: #1e293b; padding: 10px; border-radius: 12px; margin-bottom: 10px; }
+        .task-box.done { background-color: #14532d; }
+    </style>
+""", unsafe_allow_html=True)
+
+# ---------- Motivation Text ----------
+st.markdown('<div class="title">Taha\'s Powerful Planner</div>', unsafe_allow_html=True)
+st.markdown('<div class="motivation">Level up every day. No excuses. Just pure growth.</div>', unsafe_allow_html=True)
+
+# ---------- Weekly Schedule ----------
+week_days = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+tasks_per_day = {
+    'Saturday': [("08:00 - Morning Routine", False), ("10:00 - Study Math", False)],
+    'Sunday': [("08:00 - Language Class", False), ("11:00 - Review Notes", False)],
+    'Monday': [("08:00 - Gym", False), ("09:30 - Study Physics", False)],
+    'Tuesday': [("08:00 - Practice English", False), ("10:30 - Programming Project", False)],
+    'Wednesday': [("08:00 - Mock Test", False), ("11:00 - Analyze Mistakes", False)],
+    'Thursday': [("08:00 - Focus Study", False), ("13:00 - Deep Work", False)],
+    'Friday': [("09:00 - Review Week", False), ("14:00 - Relax & Read", False)]
 }
 
-st.set_page_config(layout="wide")
-st.title("Taha's Daily Schedule")
+# ---------- Select Day ----------
+selected_day = st.selectbox("Choose a day", week_days)
 
-selected_day = st.selectbox("Choose a day", list(weekly_schedule.keys()))
-done_tasks = st.session_state.setdefault("done_tasks", [])
+# ---------- Show Tasks ----------
+st.subheader(f"Plan for {selected_day}")
+day_tasks = tasks_per_day[selected_day]
 
-st.markdown("---")
-st.subheader(f"Schedule for {selected_day}")
-for idx, task in enumerate(weekly_schedule[selected_day]):
-    task_key = f"{selected_day}_{idx}"
+for idx, (task_text, _) in enumerate(day_tasks):
+    task_key_1 = f"{selected_day}_{idx}_check1"
+    task_key_2 = f"{selected_day}_{idx}_check2"
 
-    # اگر تسک انجام شده باشد
-    if task_key in done_tasks:
-        col1, col2 = st.columns([6, 1])
-        with col1:
-            st.markdown(
-                f"<div style='padding:10px; background-color:{COLOR_CHECKED}; color:white; border-radius:10px'>{task}</div>",
-                unsafe_allow_html=True
-            )
-        with col2:
-            if st.button("↩️", key=f"undo_{task_key}"):
-                done_tasks.remove(task_key)
+    if not st.session_state.get(task_key_1, False):
+        with st.container():
+            st.markdown(f'<div class="task-box">{task_text}</div>', unsafe_allow_html=True)
+            if st.checkbox("Start", key=task_key_1):
                 st.experimental_rerun()
-        continue
 
-    # چک‌لیست‌ها
-    check1 = st.checkbox("Step 1", key=f"check1_{task_key}")
-    check2_visible = check1
-    check2 = False
-    if check2_visible:
-        check2 = st.checkbox("Step 2", key=f"check2_{task_key}")
+    elif not st.session_state.get(task_key_2, False):
+        with st.container():
+            st.markdown(f'<div class="task-box">{task_text}</div>', unsafe_allow_html=True)
+            if st.checkbox("Done", key=task_key_2):
+                st.experimental_rerun()
 
-    # اگر تیک دوم زده شد
-    if check2:
-        done_tasks.append(task_key)
-        st.experimental_rerun()
-
-    # نمایش یادداشت
-    st.text_area("Note", value="", height=50, key=f"note_{task_key}")
-
-    # نمایش تسک
-    st.markdown(
-        f"<div style='padding:10px; background-color:{COLOR_PENDING}; color:white; border-radius:10px'>{task}</div>",
-        unsafe_allow_html=True
-    )
-
-    st.markdown("---")
+# ---------- Done Tasks Automatically Hidden ----------
+# Future versions will support showing Done list or restore buttons
