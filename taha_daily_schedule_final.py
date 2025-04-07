@@ -146,4 +146,8 @@ with st.form(key="action_form"):
 
     if reset_click:
         st.session_state.temp_status[selected_day] = [False] * len(tasks)
+        saved_status_data[note_key] = ""
+        with open(DATA_FILE, "w") as f:
+            json.dump(saved_status_data, f)
         st.rerun()
+
