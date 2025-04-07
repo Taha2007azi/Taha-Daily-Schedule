@@ -141,13 +141,18 @@ if selected_day != "Nothing":
                 st.session_state.temp_status[selected_day][i] = True
                 st.rerun()
 
-    # نوت‌گذاری برای هر روز
+        # نوت‌گذاری برای هر روز
     st.markdown("### Notes")
     note_key = f"{selected_day}_note"
     if note_key not in saved_status_data:
         saved_status_data[note_key] = ""
 
-    note_text = st.text_area("Write your daily report or notes here:", value=saved_status_data[note_key], height=150)
+    note_text = st.text_area(
+        "Write your daily report or notes here:",
+        key=note_key,
+        value=saved_status_data[note_key],
+        height=150
+    )
 
     # دکمه‌های Apply و Reset
     with st.form(key="action_form"):
@@ -159,7 +164,7 @@ if selected_day != "Nothing":
 
         if apply_click:
             saved_status_data[selected_day] = st.session_state.temp_status[selected_day][:]
-            saved_status_data[note_key] = note_text
+            saved_status_data[note_key] = st.session_state[note_key]
             with open(DATA_FILE, "w") as f:
                 json.dump(saved_status_data, f)
             st.success("Changes and note saved!")
@@ -170,10 +175,13 @@ if selected_day != "Nothing":
             saved_status_data[note_key] = ""
             if note_key in st.session_state:
                 del st.session_state[note_key]
+            if "text_area" in st.session_state:
+                del st.session_state["text_area"]
             with open(DATA_FILE, "w") as f:
                 json.dump(saved_status_data, f)
             st.success(f"{selected_day} has been reset successfully!")
             st.rerun()
+
 
 else:
     st.markdown("### No tasks today. Enjoy your time or take a break!")
