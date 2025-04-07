@@ -100,11 +100,11 @@ st.markdown(
 for idx, (time, default_text) in enumerate(schedule[selected_day]):
     task_key = f"{selected_day}_{idx}"
 
-    # حالت اولیه هر تسک
-    done1 = st.checkbox("Check 1", key=f"done1_{task_key}")
+    # Checkboxes for task completion
+    done1 = st.checkbox(f"Check 1 for {default_text}", key=f"done1_{task_key}")
     done2 = False
     if done1:
-        done2 = st.checkbox("Check 2", key=f"done2_{task_key}")
+        done2 = st.checkbox(f"Check 2 for {default_text}", key=f"done2_{task_key}")
 
     block_color = highlight_color if done1 and done2 else "rgba(255, 255, 255, 0.05)"
 
@@ -114,13 +114,14 @@ for idx, (time, default_text) in enumerate(schedule[selected_day]):
     with cols[0]:
         st.markdown(f"<b>{time}</b>", unsafe_allow_html=True)
     with cols[1]:
-        st.text_input("Task", value=default_text, key=f"task_{task_key}")
+        st.text_input(f"Task for {default_text}", value=default_text, key=f"task_{task_key}")
     with cols[2]:
-        st.text_area("Note", height=50, key=f"note_{task_key}")
+        st.text_area(f"Note for {default_text}", height=50, key=f"note_{task_key}")
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # اگر هر دو تیک زده شده، نمایش تسک بعدی
+    # Display next task after both checkboxes are ticked
     if done1 and done2 and idx + 1 < len(schedule[selected_day]):
         next_time, next_task = schedule[selected_day][idx + 1]
         st.info(f"Next up: **{next_task}** at {next_time}")
+``
