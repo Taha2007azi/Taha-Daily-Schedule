@@ -66,17 +66,17 @@ weekly_schedule = {
     ]
 }
 
-# رنگ و عنوان
+# رابط کاربری
 st.markdown(
-    "<h1 style='text-align: center; color: #1ABC9C;'>برنامه روزانه طاها</h1>",
+    "<h1 style='text-align: center; color: #F1C40F;'>برنامه روزانه طاها</h1>",
     unsafe_allow_html=True
 )
+
 st.markdown("<h4 style='text-align: center; color: #BDC3C7;'>با قدرت جلو برو طاها!</h4>", unsafe_allow_html=True)
 
-# انتخاب روز
 selected_day = st.selectbox("انتخاب روز:", list(weekly_schedule.keys()))
 
-# رنگ بک‌گراند
+# رنگ بک‌گراند بر اساس روز
 st.markdown(
     f"""
     <style>
@@ -97,15 +97,19 @@ st.markdown(
 
 st.subheader(f"برنامه‌ی روز {selected_day}")
 
-# نمایش برنامه با تیک و یادداشت
+# نمایش برنامه
 for idx, (time, default_task) in enumerate(weekly_schedule[selected_day]):
     st.markdown("---")
     cols = st.columns([1, 3, 4])
     with cols[0]:
         st.markdown(f"<b>{time}</b>", unsafe_allow_html=True)
+
     with cols[1]:
-        task = st.text_input(f"فعالیت", value=default_task, key=f"task_{selected_day}_{idx}")
-        done = st.checkbox("انجام شد؟", key=f"done_{selected_day}_{idx}")
+        task_key = f"task_{selected_day}_{idx}"
+        done_key = f"done_{selected_day}_{idx}"
+        task = st.text_input("فعالیت", value=default_task, key=task_key)
+        done = st.checkbox("انجام شد؟", key=done_key)
+
     with cols[2]:
-        st.markdown("یادداشت:")
-        note = st.text_area(label="", height=50, key=f"note_{selected_day}_{idx}")
+        note_key = f"note_{selected_day}_{idx}"
+        note = st.text_area("یادداشت", height=50, key=note_key)
