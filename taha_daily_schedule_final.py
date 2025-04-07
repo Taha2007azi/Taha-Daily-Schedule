@@ -2,8 +2,6 @@ import streamlit as st
 
 st.set_page_config(page_title="Taha's Planner", layout="wide")  # باید اولین دستور باشه
 
-st.set_page_config(page_title="Taha's Planner", layout="wide")
-
 # ---------- Style ----------
 st.markdown("""
     <style>
