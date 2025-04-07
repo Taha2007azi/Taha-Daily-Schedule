@@ -2,90 +2,148 @@ import streamlit as st
 import json
 import os
 
-st.set_page_config(page_title="Taha's Daily Schedule", layout="wide")
+st.set_page_config(page_title="Taha's Daily Schedule", layout="centered")
 
-DATA_FILE = "tasks_data.json"
-DEFAULT_TASKS = {
-    "Saturday": ["Study Math", "Review Physics", "English Practice"],
-    "Sunday": ["Revise Chemistry", "Mock Test", "Flashcards"],
-    "Monday": ["Computer Class", "Review Notes", "Rest"],
-    "Tuesday": ["Math Practice", "Solve Past Papers", "Read Book"],
-    "Wednesday": ["Biology", "Group Study", "Summary Notes"],
-    "Thursday": ["Mock Exam", "Relaxation", "Plan Next Week"],
-    "Friday": ["Programming Class", "Project Work", "Review Week"],
+# File to save state
+SAVE_FILE = "schedule_state.json"
+
+# Load saved state if exists
+if os.path.exists(SAVE_FILE):
+    with open(SAVE_FILE, "r") as f:
+        saved_state = json.load(f)
+else:
+    saved_state = {}
+
+# Colors for days
+day_colors = {
+    "Saturday": "#1E2A38",
+    "Sunday": "#2C3E50",
+    "Monday": "#34495E",
+    "Tuesday": "#22313F",
+    "Wednesday": "#1F3A3D",
+    "Thursday": "#2E4053",
+    "Friday": "#4A3F35"
 }
 
-COLD_COLOR = "#1F3B4D"
-TICKED_COLOR = "#2E8B57"
-DONE_COLOR = "#004953"
-TEXT_COLOR = "white"
+# Highlight color after second checkbox
+highlight_color = "#F39C12"
 
-if not os.path.exists(DATA_FILE):
-    data = {}
-    for day, tasks in DEFAULT_TASKS.items():
-        data[day] = {task: {"ticked": 0, "note": ""} for task in tasks}
-    with open(DATA_FILE, "w") as f:
-        json.dump(data, f, indent=4)
-else:
-    with open(DATA_FILE, "r") as f:
-        data = json.load(f)
+# Schedule
+schedule = {
+    "Saturday": [
+        ("05:00 – 05:30", "Mind Freeing"),
+        ("05:30 – 06:00", "Workout"),
+        ("06:00 – 07:30", "English"),
+        ("08:00 – 15:00", "School"),
+        ("15:00 – 16:00", "Rest"),
+        ("16:00 – 23:00", "Study")
+    ],
+    "Sunday": [
+        ("05:00 – 05:30", "Mind Freeing"),
+        ("05:30 – 06:00", "Workout"),
+        ("06:00 – 07:30", "English"),
+        ("08:00 – 15:00", "School"),
+        ("15:00 – 16:00", "Rest"),
+        ("16:00 – 23:00", "Language Class")
+    ],
+    "Monday": [
+        ("05:00 – 05:30", "Mind Freeing"),
+        ("05:30 – 06:00", "Workout"),
+        ("06:00 – 07:30", "English"),
+        ("08:00 – 23:00", "Study (10h)")
+    ],
+    "Tuesday": [
+        ("05:00 – 05:30", "Mind Freeing"),
+        ("05:30 – 06:00", "Workout"),
+        ("06:00 – 07:30", "English"),
+        ("08:00 – 15:00", "School"),
+        ("15:00 – 16:00", "Rest"),
+        ("16:00 – 23:00", "Language Class")
+    ],
+    "Wednesday": [
+        ("05:00 – 05:30", "Mind Freeing"),
+        ("05:30 – 06:00", "Workout"),
+        ("06:00 – 07:30", "English"),
+        ("08:00 – 23:00", "Study (10h)")
+    ],
+    "Thursday": [
+        ("08:00 – 08:30", "Mind Freeing"),
+        ("08:30 – 09:00", "Workout"),
+        ("09:00 – 10:30", "English"),
+        ("10:30 – 23:00", "Study (10h)")
+    ],
+    "Friday": [
+        ("05:00 – 05:30", "Mind Freeing"),
+        ("05:30 – 06:00", "Workout"),
+        ("06:00 – 07:30", "English"),
+        ("08:00 – 18:00", "Online Programming Class"),
+        ("18:00 – 21:00", "Review")
+    ]
+}
 
-st.title("**Taha's Daily Schedule**")
+# Title
+st.markdown(
+    "<h1 style='text-align: center; color: #F1C40F;'>Taha's Daily Schedule</h1>",
+    unsafe_allow_html=True
+)
 
-selected_day = st.selectbox("Choose a day", list(DEFAULT_TASKS.keys()))
+# Choose Day
+selected_day = st.selectbox("Select Day", list(schedule.keys()))
 
-done_tasks = []
-active_tasks = []
+# Set background color
+st.markdown(
+    f"""
+    <style>
+        .stApp {{
+            background-color: {day_colors[selected_day]};
+            color: #ECF0F1;
+        }}
+        .task-block {{
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
-for task, info in data[selected_day].items():
-    if info["ticked"] >= 2:
-        done_tasks.append((task, info))
-    else:
-        active_tasks.append((task, info))
+# UI
+for idx, (time, default_text) in enumerate(schedule[selected_day]):
+    task_key = f"{selected_day}_{idx}"
 
-st.subheader(f"Tasks for {selected_day}")
+    # Load previous state
+    task_text = saved_state.get(task_key, {}).get("task", default_text)
+    done1 = saved_state.get(task_key, {}).get("done1", False)
+    done2 = saved_state.get(task_key, {}).get("done2", False)
+    note = saved_state.get(task_key, {}).get("note", "")
 
-for task, info in active_tasks:
-    task_key = f"{selected_day}_{task}"
-    col1, col2 = st.columns([0.1, 0.9])
+    block_color = highlight_color if done1 and done2 else "rgba(255, 255, 255, 0.05)"
 
-    with col1:
-        ticked = st.checkbox("", key=f"check_{task_key}", value=info["ticked"] > 0)
+    st.markdown(f"<div class='task-block' style='background-color: {block_color};'>", unsafe_allow_html=True)
 
-    with col2:
-        box_color = TICKED_COLOR if info["ticked"] == 1 else (DONE_COLOR if info["ticked"] >= 2 else COLD_COLOR)
-        st.markdown(
-            f"<div style='background-color:{box_color};padding:10px;border-radius:5px;color:{TEXT_COLOR}'>{task}</div>",
-            unsafe_allow_html=True,
-        )
-        note = st.text_area("Note", value=info.get("note", ""), height=50, key=f"note_{task_key}")
-        info["note"] = note
+    cols = st.columns([1, 3, 2, 2])
+    with cols[0]:
+        st.markdown(f"<b>{time}</b>", unsafe_allow_html=True)
+    with cols[1]:
+        task_text = st.text_input("Task", value=task_text, key=f"task_{task_key}")
+    with cols[2]:
+        done1 = st.checkbox("Check 1", value=done1, key=f"done1_{task_key}")
+        done2 = st.checkbox("Check 2", value=done2, key=f"done2_{task_key}")
+    with cols[3]:
+        note = st.text_area("Note", value=note, height=50, key=f"note_{task_key}")
 
-    # Tick logic
-    if ticked and info["ticked"] == 0:
-        info["ticked"] = 1
-    elif ticked and info["ticked"] == 1:
-        info["ticked"] = 2
-    elif not ticked:
-        info["ticked"] = 0
+    st.markdown("</div>", unsafe_allow_html=True)
 
-st.markdown("---")
+    # Save only if both checks are done
+    if done1 and done2:
+        saved_state[task_key] = {
+            "task": task_text,
+            "done1": done1,
+            "done2": done2,
+            "note": note
+        }
 
-if done_tasks:
-    st.subheader("✅ Completed Tasks")
-    for task, info in done_tasks:
-        task_key = f"{selected_day}_{task}_done"
-        col1, col2 = st.columns([0.85, 0.15])
-        with col1:
-            st.markdown(
-                f"<div style='background-color:{DONE_COLOR};padding:10px;border-radius:5px;color:{TEXT_COLOR}'>{task}</div>",
-                unsafe_allow_html=True,
-            )
-            st.text_area("Note", value=info.get("note", ""), height=50, key=f"note_{task_key}")
-        with col2:
-            if st.button("Undo", key=f"undo_{task_key}"):
-                info["ticked"] = 1
-
-# Save updated data
-with open(DATA_FILE, "w") as f:
-    json.dump(data, f, indent=4)
+# Save to file
+with open(SAVE_FILE, "w") as f:
+    json.dump(saved_state, f)
