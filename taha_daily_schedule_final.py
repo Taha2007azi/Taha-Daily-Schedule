@@ -170,8 +170,9 @@ if selected_day != "Nothing":
             saved_status_data[note_key] = ""
             if note_key in st.session_state:
                 del st.session_state[note_key]
-            with open(DATA_FILE, "w") as f:
-                json.dump(saved_status_data, f)
-            st.rerun()
+                with open(DATA_FILE, "w") as f:
+                    json.dump(saved_status_data, f)
+                    st.rerun()
+
 else:
     st.markdown("### No tasks today. Enjoy your time or take a break!")
