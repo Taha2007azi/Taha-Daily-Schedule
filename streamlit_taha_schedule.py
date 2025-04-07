@@ -2,7 +2,7 @@ import streamlit as st
 
 st.set_page_config(page_title="برنامه روزانه طاها", layout="centered")
 
-# رنگ‌های خاص و خفنن
+# رنگ‌های خاص و خفن
 colors = {
     "شنبه": "#1E2A38",
     "یکشنبه": "#2C3E50",
