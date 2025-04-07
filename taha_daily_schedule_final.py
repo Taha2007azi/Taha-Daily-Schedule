@@ -1,11 +1,19 @@
 import streamlit as st
 
-st.set_page_config(page_title="Saturday Planner", layout="centered")
+st.set_page_config(page_title="Weekly Step Planner", layout="wide")
 
+# استایل کلی
 st.markdown("""
     <style>
         body {
             background-color: #1e1e2f;
+        }
+        .title {
+            font-size: 2.5rem;
+            color: #38b6ff;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 2rem;
         }
         .task-box {
             background-color: #2b2d42;
@@ -25,11 +33,13 @@ st.markdown("""
             font-weight: 500;
             font-size: 1.2rem;
         }
-        .title {
-            font-size: 2.5rem;
-            color: #38b6ff;
-            font-weight: bold;
+        .motiv {
+            background: linear-gradient(to right, #38b6ff, #00b4d8);
+            padding: 0.8rem;
+            border-radius: 10px;
+            color: white;
             text-align: center;
+            font-size: 1.1rem;
             margin-bottom: 2rem;
         }
         .custom-textarea {
@@ -42,37 +52,90 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="title">Saturday Plan</div>', unsafe_allow_html=True)
+# پیام انگیزشی
+st.markdown('<div class="motiv">Every step counts, Taha. Let’s make this week powerful!</div>', unsafe_allow_html=True)
+st.markdown('<div class="title">Your Weekly Step Planner</div>', unsafe_allow_html=True)
 
-tasks = [
-    "05:00 – 05:30: Mind Clearing",
-    "05:30 – 06:00: Workout",
-    "06:00 – 07:30: English",
-    "08:00 – 15:00: School",
-    "15:00 – 16:00: Rest",
-    "16:00 – 23:00: Study for Konkur"
-]
+# روزها و برنامه
+days = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+weekly_plan = {
+    "Saturday": [
+        "05:00 – 05:30: Mind Clearing",
+        "05:30 – 06:00: Workout",
+        "06:00 – 07:30: English",
+        "08:00 – 15:00: School",
+        "15:00 – 16:00: Rest",
+        "16:00 – 23:00: Study for Konkur"
+    ],
+    "Sunday": [
+        "05:00 – 05:30: Mind Clearing",
+        "05:30 – 06:00: Workout",
+        "06:00 – 07:30: English",
+        "08:00 – 15:00: School",
+        "15:00 – 16:00: Rest",
+        "16:00 – 23:00: Language Class"
+    ],
+    "Monday": [
+        "05:00 – 05:30: Mind Clearing",
+        "05:30 – 06:00: Workout",
+        "06:00 – 07:30: English",
+        "08:00 – 23:00: Heavy Konkur Study (~10h)"
+    ],
+    "Tuesday": [
+        "05:00 – 05:30: Mind Clearing",
+        "05:30 – 06:00: Workout",
+        "06:00 – 07:30: English",
+        "08:00 – 15:00: School",
+        "15:00 – 16:00: Rest",
+        "16:00 – 23:00: Language Class"
+    ],
+    "Wednesday": [
+        "05:00 – 05:30: Mind Clearing",
+        "05:30 – 06:00: Workout",
+        "06:00 – 07:30: English",
+        "08:00 – 23:00: Heavy Konkur Study (~10h)"
+    ],
+    "Thursday": [
+        "08:00 – 08:30: Mind Clearing",
+        "08:30 – 09:00: Workout",
+        "09:00 – 10:30: English",
+        "10:30 – 23:00: Heavy Konkur Study (~10h)"
+    ],
+    "Friday": [
+        "05:00 – 05:30: Mind Clearing",
+        "05:30 – 06:00: Workout",
+        "06:00 – 07:30: English",
+        "08:00 – 18:00: Online Programming Class",
+        "18:00 – 21:00: Review the Weekly Material"
+    ]
+}
 
-if 'saturday_task_index' not in st.session_state:
-    st.session_state.saturday_task_index = 0
+selected_day = st.selectbox("Choose a day:", days)
+
+if f"{selected_day}_index" not in st.session_state:
+    st.session_state[f"{selected_day}_index"] = 0
+
+st.markdown(f"### {selected_day}")
+
+tasks = weekly_plan[selected_day]
+index = st.session_state[f"{selected_day}_index"]
 
 for i, task in enumerate(tasks):
-    if i < st.session_state.saturday_task_index:
+    if i < index:
         st.markdown(f'<div class="task-done">{task} - Done!</div>', unsafe_allow_html=True)
-    elif i == st.session_state.saturday_task_index:
+    elif i == index:
         st.markdown(f'<div class="task-box">{task}</div>', unsafe_allow_html=True)
-        checkbox_key = f"task_{i}"
-        if st.checkbox("Mark as done", key=checkbox_key):
-            st.session_state.saturday_task_index += 1
+        if st.checkbox("Mark as done", key=f"{selected_day}_{i}"):
+            st.session_state[f"{selected_day}_index"] += 1
             st.rerun()
-        break  # فقط تسک فعلی نمایش داده بشه
+        break
 
-if st.session_state.saturday_task_index >= len(tasks):
-    st.success("You’ve completed all tasks for Saturday!")
+if index >= len(tasks):
+    st.success(f"All tasks for {selected_day} completed!")
 
-    score = st.slider("Rate your performance today (1–5)", 1, 5, 3)
-    st.markdown("### Write your daily reflection:")
-    report = st.text_area("Your Notes", placeholder="Write something about your day...", height=200, key="saturday_report")
+    score = st.slider("Rate your performance today (1–5)", 1, 5, 3, key=f"{selected_day}_score")
+    st.markdown("### Daily Reflection:")
+    report = st.text_area("Your Notes", placeholder="Write your thoughts about today...", height=200, key=f"{selected_day}_report")
 
     if report:
         st.markdown(f"<div class='custom-textarea'>{report}</div>", unsafe_allow_html=True)
