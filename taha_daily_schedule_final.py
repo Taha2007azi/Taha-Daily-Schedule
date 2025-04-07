@@ -1,123 +1,77 @@
 import streamlit as st
 
-# باید اولین خط باشه
-st.set_page_config(page_title="Taha's Planner", layout="wide")
+st.set_page_config(page_title="Saturday Planner", layout="centered")
 
-# استایل باکلاس و رنگ‌های سرد
-st.markdown(
-    """
+# استایل زیبا
+st.markdown("""
     <style>
         body {
             background-color: #1e1e2f;
         }
-        .task {
+        .task-box {
             background-color: #2b2d42;
+            padding: 1rem;
             border-radius: 12px;
-            padding: 0.8rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: 1rem;
             color: #e0e0e0;
             font-weight: 500;
-        }
-        .done {
-            background-color: #007f5f;
-            color: white;
+            font-size: 1.2rem;
         }
         .title {
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             color: #38b6ff;
             font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-        .motiv {
-            background: linear-gradient(to right, #38b6ff, #00b4d8);
-            padding: 0.8rem;
-            border-radius: 10px;
-            color: white;
             text-align: center;
-            font-size: 1.1rem;
             margin-bottom: 2rem;
         }
-        .day-header {
-            font-size: 1.4rem;
-            color: #5fdde5;
-            margin-top: 1.5rem;
-            margin-bottom: 1rem;
+        .custom-textarea {
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            background-color: #f2f2f2;
+            border-radius: 10px;
+            padding: 1rem;
         }
     </style>
-    """, unsafe_allow_html=True
-)
-
-# پیام انگیزشی بالا
-st.markdown('<div class="motiv">Every day you show up is one step closer to greatness. Let’s crush this week, Taha!</div>', unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
 # تیتر صفحه
-st.markdown('<div class="title">Your Weekly Planner</div>', unsafe_allow_html=True)
+st.markdown('<div class="title">Saturday Plan</div>', unsafe_allow_html=True)
 
-# روزها
-days = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+# تسک‌های شنبه
+tasks = [
+    "05:00 – 05:30: Mind Clearing",
+    "05:30 – 06:00: Workout",
+    "06:00 – 07:30: English",
+    "08:00 – 15:00: School",
+    "15:00 – 16:00: Rest",
+    "16:00 – 23:00: Study for Konkur"
+]
 
-# برنامه دقیق هفتگی
-weekly_plan = {
-    "Saturday": [
-        "05:00 – 05:30: Mental Clearing",
-        "05:30 – 06:00: Exercise",
-        "06:00 – 07:30: English",
-        "08:00 – 15:00: School",
-        "15:00 – 16:00: Rest",
-        "16:00 – 23:00: Konkur Study"
-    ],
-    "Sunday": [
-        "05:00 – 05:30: Mental Clearing",
-        "05:30 – 06:00: Exercise",
-        "06:00 – 07:30: English",
-        "08:00 – 15:00: School",
-        "15:00 – 16:00: Rest",
-        "16:00 – 23:00: Language Class"
-    ],
-    "Monday": [
-        "05:00 – 05:30: Mental Clearing",
-        "05:30 – 06:00: Exercise",
-        "06:00 – 07:30: English",
-        "08:00 – 23:00: Heavy Konkur Study (~10h)"
-    ],
-    "Tuesday": [
-        "05:00 – 05:30: Mental Clearing",
-        "05:30 – 06:00: Exercise",
-        "06:00 – 07:30: English",
-        "08:00 – 15:00: School",
-        "15:00 – 16:00: Rest",
-        "16:00 – 23:00: Language Class"
-    ],
-    "Wednesday": [
-        "05:00 – 05:30: Mental Clearing",
-        "05:30 – 06:00: Exercise",
-        "06:00 – 07:30: English",
-        "08:00 – 23:00: Heavy Konkur Study (~10h)"
-    ],
-    "Thursday": [
-        "08:00 – 08:30: Mental Clearing",
-        "08:30 – 09:00: Exercise",
-        "09:00 – 10:30: English",
-        "10:30 – 23:00: Heavy Konkur Study (~10h)"
-    ],
-    "Friday": [
-        "05:00 – 05:30: Mental Clearing",
-        "05:30 – 06:00: Exercise",
-        "06:00 – 07:30: English",
-        "08:00 – 18:00: Online Programming Class",
-        "18:00 – 21:00: Review the Weekly Material"
-    ]
-}
+# مقدار پیش‌فرض index تسک فعلی
+if 'saturday_task_index' not in st.session_state:
+    st.session_state.saturday_task_index = 0
 
-# انتخاب روز
-selected_day = st.selectbox("Choose a day to view tasks:", days)
+# تسک فعلی
+current_index = st.session_state.saturday_task_index
 
-# نمایش تسک‌های روز انتخاب‌شده
-st.markdown(f'<div class="day-header">{selected_day}</div>', unsafe_allow_html=True)
-for i, task in enumerate(weekly_plan[selected_day]):
-    task_key = f"{selected_day}_{i}_done"
-    done = st.checkbox(label=task, key=task_key)
-    if done:
-        st.markdown(f'<div class="task done">{task} - Done!</div>', unsafe_allow_html=True)
-    else:
-        st.markdown(f'<div class="task">{task}</div>', unsafe_allow_html=True)
+if current_index < len(tasks):
+    current_task = tasks[current_index]
+    st.markdown(f'<div class="task-box">{current_task}</div>', unsafe_allow_html=True)
+    task_done = st.checkbox("Done", key=f"task_{current_index}")
+
+    if task_done:
+        if st.button("Next"):
+            st.session_state.saturday_task_index += 1
+            st.experimental_rerun()
+else:
+    st.success("You’ve completed all tasks for Saturday!")
+
+    # امتیاز روز
+    score = st.slider("Rate your performance today (1-5)", 1, 5, 3)
+
+    # گزارش روزانه
+    st.markdown("### Write your daily reflection:")
+    report = st.text_area("Your Notes", placeholder="Write something about your day...", height=200, key="saturday_report")
+
+    if report:
+        st.markdown(f"<div class='custom-textarea'>{report}</div>", unsafe_allow_html=True)
