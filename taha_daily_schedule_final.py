@@ -54,11 +54,9 @@ if current_index < len(tasks):
     st.markdown(f'<div class="task-box">{current_task}</div>', unsafe_allow_html=True)
     task_done = st.checkbox("Done", key=f"task_{current_index}")
 
-    if task_done:
-        if st.button("Next"):
-            st.session_state.saturday_task_index += 1
-            st.session_state[f"task_{current_index}"] = False  # reset current checkbox
-            st._rerun()  # safe rerun method
+    if task_done and st.button("Next"):
+        st.session_state.saturday_task_index += 1
+        st.rerun()  # استفاده رسمی‌تر از rerun
 else:
     st.success("You’ve completed all tasks for Saturday!")
 
