@@ -1,8 +1,8 @@
 import streamlit as st
 
-st.set_page_config(page_title="Taha's Daily Schedule", layout="centered")
+st.set_page_config(page_title="Taha's Daily Plan", layout="centered")
 
-# Stylish colors per day
+# Custom colors per day
 colors = {
     "Saturday": "#1E2A38",
     "Sunday": "#2C3E50",
@@ -13,7 +13,7 @@ colors = {
     "Friday": "#4A3F35"
 }
 
-# Weekly plan
+# Weekly schedule
 weekly_schedule = {
     "Saturday": [
         ("5:00 – 5:30", "Mind Release"),
@@ -21,7 +21,7 @@ weekly_schedule = {
         ("6:00 – 7:30", "English"),
         ("8:00 – 15:00", "School"),
         ("15:00 – 16:00", "Rest"),
-        ("16:00 – 23:00", "Study (Exam Prep) + Lunch + Break")
+        ("16:00 – 23:00", "Study for Konkur")
     ],
     "Sunday": [
         ("5:00 – 5:30", "Mind Release"),
@@ -35,7 +35,7 @@ weekly_schedule = {
         ("5:00 – 5:30", "Mind Release"),
         ("5:30 – 6:00", "Exercise"),
         ("6:00 – 7:30", "English"),
-        ("8:00 – 23:00", "Study Day (10 Hours + Breaks)")
+        ("8:00 – 23:00", "Heavy Study")
     ],
     "Tuesday": [
         ("5:00 – 5:30", "Mind Release"),
@@ -49,40 +49,40 @@ weekly_schedule = {
         ("5:00 – 5:30", "Mind Release"),
         ("5:30 – 6:00", "Exercise"),
         ("6:00 – 7:30", "English"),
-        ("8:00 – 23:00", "Study Day (10 Hours + Breaks)")
+        ("8:00 – 23:00", "Heavy Study")
     ],
     "Thursday": [
         ("8:00 – 8:30", "Mind Release"),
         ("8:30 – 9:00", "Exercise"),
         ("9:00 – 10:30", "English"),
-        ("10:30 – 23:00", "Study Day (10 Hours + Breaks)")
+        ("10:30 – 23:00", "Heavy Study")
     ],
     "Friday": [
         ("5:00 – 5:30", "Mind Release"),
         ("5:30 – 6:00", "Exercise"),
         ("6:00 – 7:30", "English"),
         ("8:00 – 18:00", "Online Programming Class"),
-        ("18:00 – 21:00", "Review Language or Exam Material")
+        ("18:00 – 21:00", "Review (English or Konkur)")
     ]
 }
 
-# Title
+# Header
 st.markdown(
-    "<h1 style='text-align: center; color: #F1C40F;'>Taha's Daily Schedule</h1>",
+    "<h1 style='text-align: center; color: #F7DC6F;'>Taha's Daily Schedule</h1>",
     unsafe_allow_html=True
 )
-st.markdown("<h4 style='text-align: center; color: #BDC3C7;'>Keep Going Strong, Taha!</h4>", unsafe_allow_html=True)
+st.markdown("<h4 style='text-align: center; color: #BDC3C7;'>Let's crush the day!</h4>", unsafe_allow_html=True)
 
 selected_day = st.selectbox("Choose a day:", list(weekly_schedule.keys()))
 
-# Background color based on selected day
+# Custom background color
 st.markdown(
     f"""
     <style>
         .stApp {{
             background-color: {colors[selected_day]};
             color: #ECF0F1;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Tahoma', sans-serif;
         }}
         .stCheckbox > div {{
             background-color: rgba(255, 255, 255, 0.05);
@@ -90,8 +90,8 @@ st.markdown(
             border-radius: 8px;
         }}
         textarea, input {{
-            background-color: #f4f6f7 !important;
-            color: #2c3e50 !important;
+            background-color: rgba(255, 255, 255, 0.05) !important;
+            color: #ECF0F1 !important;
         }}
     </style>
     """,
@@ -100,14 +100,19 @@ st.markdown(
 
 st.subheader(f"Schedule for {selected_day}")
 
-# Display each time slot
+# Show tasks
 for idx, (time_slot, default_text) in enumerate(weekly_schedule[selected_day]):
     st.markdown("---")
+    
+    # Safe key
+    day_key = selected_day.replace(" ", "_")
+    base_key = f"{day_key}_{idx}"
+
     cols = st.columns([1, 3, 4])
     with cols[0]:
         st.markdown(f"<b>{time_slot}</b>", unsafe_allow_html=True)
     with cols[1]:
-        task = st.text_input("Task", value=default_text, key=f"task_{selected_day}_{idx}")
-        done = st.checkbox("Done?", key=f"done_{selected_day}_{idx}")
+        task = st.text_input("Task", value=default_text, key=f"task_{base_key}")
+        done = st.checkbox("Done?", key=f"done_{base_key}")
     with cols[2]:
-        note = st.text_area("Note", height=50, key=f"note_{selected_day}_{idx}")
+        note = st.text_area("Note", height=50, key=f"note_{base_key}")
