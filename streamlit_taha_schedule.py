@@ -110,6 +110,7 @@ st.markdown(
 
 # UI
 for idx, (time, default_text) in enumerate(schedule[selected_day]):
+    note = st.text_area("Note", value=note if note is not None else "", height=50, key=f"note_{task_key}")
     task_key = f"{selected_day}_{idx}"
 
     # Load previous state
