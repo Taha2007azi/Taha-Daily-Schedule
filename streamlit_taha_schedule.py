@@ -104,7 +104,8 @@ for idx, (time, default_task) in enumerate(weekly_schedule[selected_day]):
     with cols[0]:
         st.markdown(f"<b>{time}</b>", unsafe_allow_html=True)
     with cols[1]:
-        task = st.text_input(f"فعالیت_{selected_day}_{idx}", value=default_task, key=f"task_{selected_day}_{idx}")
+        task = st.text_input(f"فعالیت", value=default_task, key=f"task_{selected_day}_{idx}")
         done = st.checkbox("انجام شد؟", key=f"done_{selected_day}_{idx}")
     with cols[2]:
-        note = st.text_area(f"یادداشت_{selected_day}_{idx}", height=50, key=f"note_{selected_day}_{idx}")
+        st.markdown("یادداشت:")
+        note = st.text_area(label="", height=50, key=f"note_{selected_day}_{idx}")
