@@ -163,9 +163,19 @@ with st.form(key="action_form"):
         st.success("Changes and note saved!")
 
     if reset_click:
-        st.session_state.temp_status[selected_day] = [False] * len(tasks)
-        saved_status_data[selected_day] = [False] * len(tasks)
-        saved_status_data[note_key] = ""
-        with open(DATA_FILE, "w") as f:
-            json.dump(saved_status_data, f)
-        st.rerun()
+    # پاک‌سازی تسک‌ها
+    st.session_state.temp_status[selected_day] = [False] * len(tasks)
+    saved_status_data[selected_day] = [False] * len(tasks)
+
+    # پاک‌سازی نوت
+    saved_status_data[note_key] = ""
+
+    # حذف مستقیم از session_state هم برای نوت
+    if note_key in st.session_state:
+        del st.session_state[note_key]
+
+    with open(DATA_FILE, "w") as f:
+        json.dump(saved_status_data, f)
+
+    st.rerun()
+
