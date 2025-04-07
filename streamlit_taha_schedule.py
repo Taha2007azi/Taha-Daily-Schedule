@@ -1,118 +1,108 @@
 import streamlit as st
 
+# Page setup
 st.set_page_config(page_title="Taha's Daily Plan", layout="centered")
 
-# Custom colors per day
+# Nice, modern colors
 colors = {
-    "Saturday": "#1E2A38",
+    "Saturday": "#1F2833",
     "Sunday": "#2C3E50",
     "Monday": "#34495E",
     "Tuesday": "#22313F",
     "Wednesday": "#1F3A3D",
     "Thursday": "#2E4053",
-    "Friday": "#4A3F35"
+    "Friday": "#3C4F65"
 }
 
-# Weekly schedule
+# Weekly schedule (time + default activity)
 weekly_schedule = {
     "Saturday": [
-        ("5:00 – 5:30", "Mind Release"),
-        ("5:30 – 6:00", "Exercise"),
-        ("6:00 – 7:30", "English"),
+        ("5:00 – 5:30", "Mind Clearing"),
+        ("5:30 – 6:00", "Workout"),
+        ("6:00 – 7:30", "English Study"),
         ("8:00 – 15:00", "School"),
         ("15:00 – 16:00", "Rest"),
-        ("16:00 – 23:00", "Study for Konkur")
+        ("16:00 – 23:00", "Entrance Exam Study + Breaks")
     ],
     "Sunday": [
-        ("5:00 – 5:30", "Mind Release"),
-        ("5:30 – 6:00", "Exercise"),
-        ("6:00 – 7:30", "English"),
+        ("5:00 – 5:30", "Mind Clearing"),
+        ("5:30 – 6:00", "Workout"),
+        ("6:00 – 7:30", "English Study"),
         ("8:00 – 15:00", "School"),
         ("15:00 – 16:00", "Rest"),
-        ("16:00 – 23:00", "Language Class")
+        ("16:00 – 23:00", "English Class")
     ],
     "Monday": [
-        ("5:00 – 5:30", "Mind Release"),
-        ("5:30 – 6:00", "Exercise"),
-        ("6:00 – 7:30", "English"),
-        ("8:00 – 23:00", "Heavy Study")
+        ("5:00 – 5:30", "Mind Clearing"),
+        ("5:30 – 6:00", "Workout"),
+        ("6:00 – 7:30", "English Study"),
+        ("8:00 – 23:00", "10-Hour Exam Study")
     ],
     "Tuesday": [
-        ("5:00 – 5:30", "Mind Release"),
-        ("5:30 – 6:00", "Exercise"),
-        ("6:00 – 7:30", "English"),
+        ("5:00 – 5:30", "Mind Clearing"),
+        ("5:30 – 6:00", "Workout"),
+        ("6:00 – 7:30", "English Study"),
         ("8:00 – 15:00", "School"),
         ("15:00 – 16:00", "Rest"),
-        ("16:00 – 23:00", "Language Class")
+        ("16:00 – 23:00", "English Class")
     ],
     "Wednesday": [
-        ("5:00 – 5:30", "Mind Release"),
-        ("5:30 – 6:00", "Exercise"),
-        ("6:00 – 7:30", "English"),
-        ("8:00 – 23:00", "Heavy Study")
+        ("5:00 – 5:30", "Mind Clearing"),
+        ("5:30 – 6:00", "Workout"),
+        ("6:00 – 7:30", "English Study"),
+        ("8:00 – 23:00", "10-Hour Exam Study")
     ],
     "Thursday": [
-        ("8:00 – 8:30", "Mind Release"),
-        ("8:30 – 9:00", "Exercise"),
-        ("9:00 – 10:30", "English"),
-        ("10:30 – 23:00", "Heavy Study")
+        ("8:00 – 8:30", "Mind Clearing"),
+        ("8:30 – 9:00", "Workout"),
+        ("9:00 – 10:30", "English Study"),
+        ("10:30 – 23:00", "10-Hour Exam Study")
     ],
     "Friday": [
-        ("5:00 – 5:30", "Mind Release"),
-        ("5:30 – 6:00", "Exercise"),
-        ("6:00 – 7:30", "English"),
+        ("5:00 – 5:30", "Mind Clearing"),
+        ("5:30 – 6:00", "Workout"),
+        ("6:00 – 7:30", "English Study"),
         ("8:00 – 18:00", "Online Programming Class"),
-        ("18:00 – 21:00", "Review (English or Konkur)")
+        ("18:00 – 21:00", "Review Study")
     ]
 }
 
-# Header
-st.markdown(
-    "<h1 style='text-align: center; color: #F7DC6F;'>Taha's Daily Schedule</h1>",
-    unsafe_allow_html=True
-)
-st.markdown("<h4 style='text-align: center; color: #BDC3C7;'>Let's crush the day!</h4>", unsafe_allow_html=True)
+# Title
+st.markdown("<h1 style='text-align: center; color: #FFD700;'>Taha's Daily Schedule</h1>", unsafe_allow_html=True)
+st.markdown("<h4 style='text-align: center; color: #D0D3D4;'>You're unstoppable, Taha!</h4>", unsafe_allow_html=True)
 
-selected_day = st.selectbox("Choose a day:", list(weekly_schedule.keys()))
+selected_day = st.selectbox("Select a day:", list(weekly_schedule.keys()))
 
-# Custom background color
-st.markdown(
-    f"""
+# Background color based on the selected day
+st.markdown(f"""
     <style>
-        .stApp {{
-            background-color: {colors[selected_day]};
-            color: #ECF0F1;
-            font-family: 'Tahoma', sans-serif;
-        }}
-        .stCheckbox > div {{
-            background-color: rgba(255, 255, 255, 0.05);
-            padding: 10px;
-            border-radius: 8px;
-        }}
-        textarea, input {{
-            background-color: rgba(255, 255, 255, 0.05) !important;
-            color: #ECF0F1 !important;
-        }}
+    .stApp {{
+        background-color: {colors[selected_day]};
+        color: #F5F5F5;
+        font-family: 'Arial', sans-serif;
+    }}
+    .stCheckbox > div {{
+        background-color: rgba(255, 255, 255, 0.05);
+        padding: 10px;
+        border-radius: 8px;
+    }}
     </style>
-    """,
-    unsafe_allow_html=True
-)
+""", unsafe_allow_html=True)
 
 st.subheader(f"Schedule for {selected_day}")
 
-# Show tasks
-for idx, (time_slot, default_text) in enumerate(weekly_schedule[selected_day]):
+# Display tasks with checkbox and note
+for idx, (time, default_task) in enumerate(weekly_schedule[selected_day]):
     st.markdown("---")
-    
-    # Safe key
-    day_key = selected_day.replace(" ", "_")
-    base_key = f"{day_key}_{idx}"
+    col1, col2, col3 = st.columns([1, 3, 4])
 
-    cols = st.columns([1, 3, 4])
-    with cols[0]:
-        st.markdown(f"<b>{time_slot}</b>", unsafe_allow_html=True)
-    with cols[1]:
-        task = st.text_input("Task", value=default_text, key=f"task_{base_key}")
-        done = st.checkbox("Done?", key=f"done_{base_key}")
-    with cols[2]:
-        note = st.text_area("Note", height=50, key=f"note_{base_key}")
+    with col1:
+        st.markdown(f"**{time}**")
+
+    with col2:
+        task = st.text_input("Task", value=default_task, key=f"task_{selected_day}_{idx}")
+        done = st.checkbox("Done?", key=f"done_{selected_day}_{idx}")
+
+    with col3:
+        note_key = f"note_{selected_day}_{idx}"
+        note = st.text_area("Note", height=50, key=note_key)
