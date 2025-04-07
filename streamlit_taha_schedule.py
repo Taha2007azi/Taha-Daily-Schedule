@@ -4,31 +4,26 @@ import os
 
 st.set_page_config(page_title="Taha's Daily Schedule", layout="centered")
 
-# File to save state
 SAVE_FILE = "schedule_state.json"
 
-# Load saved state if exists
 if os.path.exists(SAVE_FILE):
     with open(SAVE_FILE, "r") as f:
         saved_state = json.load(f)
 else:
     saved_state = {}
 
-# Colors for days
 day_colors = {
-    "Saturday": "#1E2A38",
-    "Sunday": "#2C3E50",
-    "Monday": "#34495E",
-    "Tuesday": "#22313F",
-    "Wednesday": "#1F3A3D",
-    "Thursday": "#2E4053",
-    "Friday": "#4A3F35"
+    "Saturday": "#1B2631",
+    "Sunday": "#212F3D",
+    "Monday": "#2C3E50",
+    "Tuesday": "#273746",
+    "Wednesday": "#2E4053",
+    "Thursday": "#283747",
+    "Friday": "#17202A"
 }
 
-# Highlight color after second checkbox
-highlight_color = "#F39C12"
+highlight_color = "#1ABC9C"
 
-# Schedule
 schedule = {
     "Saturday": [
         ("05:00 – 05:30", "Mind Freeing"),
@@ -81,16 +76,13 @@ schedule = {
     ]
 }
 
-# Title
 st.markdown(
     "<h1 style='text-align: center; color: #F1C40F;'>Taha's Daily Schedule</h1>",
     unsafe_allow_html=True
 )
 
-# Choose Day
 selected_day = st.selectbox("Select Day", list(schedule.keys()))
 
-# Set background color
 st.markdown(
     f"""
     <style>
@@ -108,34 +100,32 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# UI
 for idx, (time, default_text) in enumerate(schedule[selected_day]):
     task_key = f"{selected_day}_{idx}"
 
-    # Load previous state
     task_text = saved_state.get(task_key, {}).get("task", default_text)
     done1 = saved_state.get(task_key, {}).get("done1", False)
     done2 = saved_state.get(task_key, {}).get("done2", False)
     note = saved_state.get(task_key, {}).get("note", "")
 
-    block_color = highlight_color if done1 and done2 else "rgba(255, 255, 255, 0.05)"
+    block_color = highlight_color if done1 and done2 else "rgba(255, 255, 255, 0.07)"
 
     st.markdown(f"<div class='task-block' style='background-color: {block_color};'>", unsafe_allow_html=True)
 
-    cols = st.columns([1, 3, 2, 2])
+    cols = st.columns([1, 3, 1.5, 2])
     with cols[0]:
         st.markdown(f"<b>{time}</b>", unsafe_allow_html=True)
     with cols[1]:
         task_text = st.text_input("Task", value=task_text, key=f"task_{task_key}")
     with cols[2]:
-        done1 = st.checkbox("Check 1", value=done1, key=f"done1_{task_key}")
-        done2 = st.checkbox("Check 2", value=done2, key=f"done2_{task_key}")
+        done1 = st.checkbox("✓", value=done1, key=f"done1_{task_key}")
+        if done1:
+            done2 = st.checkbox("✓✓", value=done2, key=f"done2_{task_key}")
     with cols[3]:
         note = st.text_area("Note", value=note, height=50, key=f"note_{task_key}")
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # Save only if both checks are done
     if done1 and done2:
         saved_state[task_key] = {
             "task": task_text,
@@ -143,7 +133,13 @@ for idx, (time, default_text) in enumerate(schedule[selected_day]):
             "done2": done2,
             "note": note
         }
+    else:
+        saved_state[task_key] = {
+            "task": task_text,
+            "done1": done1,
+            "done2": done2,
+            "note": note
+        }
 
-# Save to file
 with open(SAVE_FILE, "w") as f:
     json.dump(saved_state, f)
