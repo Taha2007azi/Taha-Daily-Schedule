@@ -127,33 +127,35 @@ if "temp_status" not in st.session_state:
 if selected_day not in st.session_state.temp_status:
     st.session_state.temp_status[selected_day] = saved_status_data[selected_day][:]
 
-# هندل کردن کلیک از query params
-clicked_key = st.experimental_get_query_params().get("clicked", [None])[0]
+# هندل کردن کلیک از query params با API جدید
+query = st.query_params
+clicked_key = query.get("clicked")
 if clicked_key:
-    day_key, task_idx = clicked_key.rsplit("_", 1)
-    task_idx = int(task_idx)
-    if not st.session_state.temp_status.get(day_key):
-        st.session_state.temp_status[day_key] = saved_status_data[day_key][:]
-    if not st.session_state.temp_status[day_key][task_idx]:
-        st.session_state.temp_status[day_key][task_idx] = True
-    st.experimental_set_query_params()  # پاک‌کردن URL
-    st.rerun()
+    if "_" in clicked_key:
+        day_key, task_idx = clicked_key.rsplit("_", 1)
+        task_idx = int(task_idx)
+        if not st.session_state.temp_status.get(day_key):
+            st.session_state.temp_status[day_key] = saved_status_data[day_key][:]
+        if not st.session_state.temp_status[day_key][task_idx]:
+            st.session_state.temp_status[day_key][task_idx] = True
+        st.query_params.clear()
+        st.rerun()
 
-# نمایش تسک‌ها با کلیک مستقیم روی باکس
+# نمایش تسک‌ها
 for i, task in enumerate(tasks):
     task_key = f"{selected_day}_{i}"
     color_class = "task-done" if st.session_state.temp_status[selected_day][i] else ""
     container_id = f"task_container_{task_key}"
     st.markdown(
         f"""
-        <div id="{container_id}" class="task-box {color_class}" onclick="fetch('/?clicked={task_key}').then(() => window.location.reload());">
+        <div id="{container_id}" class="task-box {color_class}" onclick="window.location.search='?clicked={task_key}';">
             {task}
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-# دکمه‌ها با ظاهر زیبا و بدون باگ
+# دکمه‌ها
 st.markdown('<div class="button-container">', unsafe_allow_html=True)
 col1, col2 = st.columns([1, 1])
 with col1:
@@ -166,6 +168,6 @@ with col1:
 with col2:
     if st.button("❌ Reset"):
         st.session_state.temp_status[selected_day] = [False] * len(tasks)
-        st.experimental_set_query_params()  # حذف query اگر بود
+        st.query_params.clear()
         st.rerun()
 st.markdown('</div>', unsafe_allow_html=True)
