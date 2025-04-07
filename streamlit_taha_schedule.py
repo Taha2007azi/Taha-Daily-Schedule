@@ -2,61 +2,63 @@ import streamlit as st
 import json
 import os
 
-DATA_FILE = "tasks_data.json"
+DATA_FILE = "taha_schedule_data.json"
 
-# Load or initialize data
-if os.path.exists(DATA_FILE):
-    with open(DATA_FILE, "r") as f:
-        data = json.load(f)
-else:
-    data = {}
+# ---------- Load or Initialize Schedule ----------
+def load_data():
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "r") as f:
+            return json.load(f)
+    return {}
 
-selected_day = st.selectbox("Select a day", ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"])
-if selected_day not in data:
-    data[selected_day] = {"tasks": [], "done_tasks": []}
+def save_data(data):
+    with open(DATA_FILE, "w") as f:
+        json.dump(data, f, indent=4)
 
-st.title(f"Tasks for {selected_day}")
+schedule_data = load_data()
 
-# Input for new task
-new_task = st.text_input("Add new task")
-if st.button("Add Task"):
-    if new_task:
-        task_id = f"{selected_day}_{len(data[selected_day]['tasks']) + len(data[selected_day]['done_tasks'])}"
-        data[selected_day]["tasks"].append({"id": task_id, "text": new_task, "note": ""})
-        with open(DATA_FILE, "w") as f:
-            json.dump(data, f)
+# ---------- Get Current Day ----------
+days_of_week = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+selected_day = st.selectbox("Select your day:", days_of_week)
 
-# Show active tasks
-st.subheader("Active Tasks")
-for idx, task in enumerate(data[selected_day]["tasks"]):
-    task_key = task["id"]
-    st.markdown(f"**{task['text']}**")
-    note_key = f"note_{task_key}"
-    
-    if note_key not in st.session_state:
-        st.session_state[note_key] = task.get("note", "")
+if selected_day not in schedule_data:
+    schedule_data[selected_day] = []
 
-    note = st.text_area("Note", height=50, key=note_key)
+# ---------- Display Tasks ----------
+st.title(f"Schedule for {selected_day}")
+next_tasks = []
+done_tasks = []
 
-    col1, col2 = st.columns(2)
+for idx, task_data in enumerate(schedule_data[selected_day]):
+    task_key = f"{selected_day}_{idx}"
+    task_text = task_data.get("task", "")
+    is_done = task_data.get("done", False)
+    note = task_data.get("note", "")
+
+    col1, col2 = st.columns([6, 1])
     with col1:
-        if st.button(f"Done {task_key}"):
-            task["note"] = st.session_state[note_key]
-            data[selected_day]["done_tasks"].append(task)
-            data[selected_day]["tasks"].pop(idx)
-            with open(DATA_FILE, "w") as f:
-                json.dump(data, f)
-            st.experimental_rerun()
+        color = "#dfffcf" if is_done else "#fff7c2"  # Green if done, yellow if not
+        st.markdown(f"<div style='padding: 10px; background-color: {color}; border-radius: 5px;'>{task_text}</div>", unsafe_allow_html=True)
+        updated_note = st.text_area("Note", value=str(note), height=50, key=f"note_{task_key}")
 
-# Show done tasks
+    with col2:
+        if st.button("Done" if not is_done else "Undo", key=f"done_button_{task_key}"):
+            task_data["done"] = not is_done
+        task_data["note"] = updated_note
+
+    # Sort done tasks at bottom
+    if task_data["done"]:
+        done_tasks.append(task_data)
+    else:
+        next_tasks.append(task_data)
+
+# ---------- Update Display ----------
+schedule_data[selected_day] = next_tasks + done_tasks
+save_data(schedule_data)
+
+# ---------- Done Section ----------
+st.markdown("---")
 st.subheader("Completed Tasks")
-for idx, task in enumerate(data[selected_day]["done_tasks"]):
-    task_key = task["id"]
-    st.markdown(f"~~{task['text']}~~")
-    st.markdown(f"Note: {task['note']}")
-    if st.button(f"Undo {task_key}"):
-        data[selected_day]["tasks"].append(task)
-        data[selected_day]["done_tasks"].pop(idx)
-        with open(DATA_FILE, "w") as f:
-            json.dump(data, f)
-        st.experimental_rerun()
+
+for task in done_tasks:
+    st.markdown(f"- {task['task']}")
