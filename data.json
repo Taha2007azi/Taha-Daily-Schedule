@@ -1,0 +1,37 @@
+{
+    "Saturday": {
+        "completed_index": 0,
+        "score": null,
+        "note": ""
+    },
+    "Sunday": {
+        "completed_index": 0,
+        "score": null,
+        "note": ""
+    },
+    "Monday": {
+        "completed_index": 0,
+        "score": null,
+        "note": ""
+    },
+    "Tuesday": {
+        "completed_index": 0,
+        "score": null,
+        "note": ""
+    },
+    "Wednesday": {
+        "completed_index": 0,
+        "score": null,
+        "note": ""
+    },
+    "Thursday": {
+        "completed_index": 0,
+        "score": null,
+        "note": ""
+    },
+    "Friday": {
+        "completed_index": 0,
+        "score": null,
+        "note": ""
+    }
+}
