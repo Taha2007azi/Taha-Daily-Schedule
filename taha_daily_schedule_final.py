@@ -41,6 +41,7 @@ st.markdown(
             font-size: 1.4rem;
             color: #5fdde5;
             margin-top: 1.5rem;
+            margin-bottom: 1rem;
         }
     </style>
     """, unsafe_allow_html=True
@@ -50,12 +51,12 @@ st.markdown(
 st.markdown('<div class="motiv">Every day you show up is one step closer to greatness. Let’s crush this week, Taha!</div>', unsafe_allow_html=True)
 
 # تیتر صفحه
-st.markdown('<div class="title">Your Full Weekly Planner</div>', unsafe_allow_html=True)
+st.markdown('<div class="title">Your Weekly Planner</div>', unsafe_allow_html=True)
 
 # روزها
 days = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 
-# برنامه دقیق هفتگی با تایم‌بندی روتین‌ها و تسک‌ها
+# برنامه دقیق هفتگی
 weekly_plan = {
     "Saturday": [
         "05:00 – 05:30: Mental Clearing",
@@ -108,13 +109,15 @@ weekly_plan = {
     ]
 }
 
-# رندر کل هفته
-for day in days:
-    st.markdown(f'<div class="day-header">{day}</div>', unsafe_allow_html=True)
-    for i, task in enumerate(weekly_plan[day]):
-        task_key = f"{day}_{i}_done"
-        done = st.checkbox(label=task, key=task_key)
-        if done:
-            st.markdown(f'<div class="task done">{task} - Done!</div>', unsafe_allow_html=True)
-        else:
-            st.markdown(f'<div class="task">{task}</div>', unsafe_allow_html=True)
+# انتخاب روز
+selected_day = st.selectbox("Choose a day to view tasks:", days)
+
+# نمایش تسک‌های روز انتخاب‌شده
+st.markdown(f'<div class="day-header">{selected_day}</div>', unsafe_allow_html=True)
+for i, task in enumerate(weekly_plan[selected_day]):
+    task_key = f"{selected_day}_{i}_done"
+    done = st.checkbox(label=task, key=task_key)
+    if done:
+        st.markdown(f'<div class="task done">{task} - Done!</div>', unsafe_allow_html=True)
+    else:
+        st.markdown(f'<div class="task">{task}</div>', unsafe_allow_html=True)
