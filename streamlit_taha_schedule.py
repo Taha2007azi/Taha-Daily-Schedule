@@ -93,14 +93,26 @@ st.subheader(f"برنامه‌ی روز {selected_day}")
 # تابع برای ساخت هر آیتم برنامه
 def show_task_block(index, time, task_text):
     st.markdown("---")
+    simple_key = f"{selected_day[:2]}_{index}"  # کلید ساده‌تر
     cols = st.columns([1, 3, 4])
     with cols[0]:
         st.markdown(f"<b>{time}</b>", unsafe_allow_html=True)
     with cols[1]:
-        task = st.text_input("فعالیت", value=task_text, key=f"task_{selected_day}_{index}")
-        done = st.checkbox("انجام شد؟", key=f"done_{selected_day}_{index}")
+        task = st.text_input("فعالیت", value=task_text, key=f"task_{simple_key}")
+        done = st.checkbox("انجام شد؟", key=f"done_{simple_key}")
     with cols[2]:
-        note = st.text_area("یادداشت", height=50, key=f"note_{selected_day}_{index}")
+        note = st.text_area("یادداشت", height=50, key=f"note_{simple_key}")
+def show_task_block(index, time, task_text):
+    st.markdown("---")
+    simple_key = f"{selected_day[:2]}_{index}"  # کلید ساده‌تر
+    cols = st.columns([1, 3, 4])
+    with cols[0]:
+        st.markdown(f"<b>{time}</b>", unsafe_allow_html=True)
+    with cols[1]:
+        task = st.text_input("فعالیت", value=task_text, key=f"task_{simple_key}")
+        done = st.checkbox("انجام شد؟", key=f"done_{simple_key}")
+    with cols[2]:
+        note = st.text_area("یادداشت", height=50, key=f"note_{simple_key}")
 
 # اجرای برنامه‌ی روز انتخاب‌شده
 for idx, (time_slot, default_text) in enumerate(weekly_schedule[selected_day]):
