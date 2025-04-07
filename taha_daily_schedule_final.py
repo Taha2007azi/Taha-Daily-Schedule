@@ -4,6 +4,24 @@ import os
 
 st.set_page_config(page_title="Weekly Plan", layout="wide")
 
+# جمله انگیزشی
+motivational_text = "“Push yourself, because no one else is going to do it for you.”"
+st.markdown(f"""
+    <div style='
+        text-align: center;
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #4dd0e1;
+        margin: 2rem 0;
+        padding: 1rem;
+        background-color: #1e1e1e;
+        border-radius: 12px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.3);
+    '>
+        {motivational_text}
+    </div>
+""", unsafe_allow_html=True)
+
 DATA_FILE = "task_status.json"
 
 # Load or create status file
@@ -150,4 +168,3 @@ with st.form(key="action_form"):
         with open(DATA_FILE, "w") as f:
             json.dump(saved_status_data, f)
         st.rerun()
-
