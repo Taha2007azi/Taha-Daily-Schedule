@@ -60,12 +60,13 @@ for day in days:
     for i, task in enumerate(weekly_plan[day]):
         col1, col2 = st.columns([1, 5])
         with col1:
-            check1 = st.checkbox(f"{day}_{i}_check1", label_visibility="collapsed")
+            check1 = st.checkbox(label="", key=f"{day}_{i}_check1", label_visibility="collapsed")
         with col2:
             if check1:
-                check2 = st.checkbox(f"{day}_{i}_check2", label=task)
+                check2 = st.checkbox(label=task, key=f"{day}_{i}_check2")
                 if check2:
                     st.markdown(f'<div class="task done">{task} - Done!</div>', unsafe_allow_html=True)
             else:
                 st.markdown(f'<div class="task">{task}</div>', unsafe_allow_html=True)
     st.markdown("---")
+
