@@ -87,35 +87,25 @@ st.markdown("""
             font-weight: 500;
             font-size: 1.1rem;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s;
+        }
+        .task-box:hover {
+            background-color: #3a3c5c;
         }
         .task-done {
             background-color: #007f5f !important;
             color: white !important;
-            pointer-events: none;
         }
-        .custom-button {
-            display: inline-block;
-            padding: 0.6rem 1.5rem;
-            border-radius: 10px;
-            background-color: #1f7a8c;
-            color: white;
-            font-weight: bold;
-            font-size: 1.1rem;
-            border: none;
-            transition: background-color 0.3s ease;
-            margin-top: 1rem;
-            width: 100%;
-            text-align: center;
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
         }
-        .custom-button:hover {
-            background-color: #136a75;
-        }
-        .reset-button {
-            background-color: #bf0603;
-        }
-        .reset-button:hover {
-            background-color: #a00402;
+        .stButton > button {
+            font-size: 1rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -137,27 +127,45 @@ if "temp_status" not in st.session_state:
 if selected_day not in st.session_state.temp_status:
     st.session_state.temp_status[selected_day] = saved_status_data[selected_day][:]
 
-# نمایش تسک‌ها
-for i, task in enumerate(tasks):
-    if st.session_state.temp_status[selected_day][i]:
-        st.markdown(f'<div class="task-box task-done">{task}</div>', unsafe_allow_html=True)
-    else:
-        if st.button(f"✔️ {task}", key=f"{selected_day}_{i}"):
-            st.session_state.temp_status[selected_day][i] = True
-            st.rerun()
+# هندل کردن کلیک از query params
+clicked_key = st.experimental_get_query_params().get("clicked", [None])[0]
+if clicked_key:
+    day_key, task_idx = clicked_key.rsplit("_", 1)
+    task_idx = int(task_idx)
+    if not st.session_state.temp_status.get(day_key):
+        st.session_state.temp_status[day_key] = saved_status_data[day_key][:]
+    if not st.session_state.temp_status[day_key][task_idx]:
+        st.session_state.temp_status[day_key][task_idx] = True
+    st.experimental_set_query_params()  # پاک‌کردن URL
+    st.rerun()
 
-# دکمه‌های Apply و Reset با استایل زیبا
-col1, col2 = st.columns(2)
+# نمایش تسک‌ها با کلیک مستقیم روی باکس
+for i, task in enumerate(tasks):
+    task_key = f"{selected_day}_{i}"
+    color_class = "task-done" if st.session_state.temp_status[selected_day][i] else ""
+    container_id = f"task_container_{task_key}"
+    st.markdown(
+        f"""
+        <div id="{container_id}" class="task-box {color_class}" onclick="fetch('/?clicked={task_key}').then(() => window.location.reload());">
+            {task}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+# دکمه‌ها با ظاهر زیبا و بدون باگ
+st.markdown('<div class="button-container">', unsafe_allow_html=True)
+col1, col2 = st.columns([1, 1])
 with col1:
-    apply_btn = st.markdown('<button class="custom-button">✅ Apply</button>', unsafe_allow_html=True)
-    if st.button("", key="apply_hidden"):
+    if st.button("✅ Apply"):
         saved_status_data[selected_day] = st.session_state.temp_status[selected_day][:]
         with open(DATA_FILE, "w") as f:
             json.dump(saved_status_data, f)
         st.success("Changes applied and saved!")
 
 with col2:
-    reset_btn = st.markdown('<button class="custom-button reset-button">❌ Reset</button>', unsafe_allow_html=True)
-    if st.button("", key="reset_hidden"):
+    if st.button("❌ Reset"):
         st.session_state.temp_status[selected_day] = [False] * len(tasks)
+        st.experimental_set_query_params()  # حذف query اگر بود
         st.rerun()
+st.markdown('</div>', unsafe_allow_html=True)
