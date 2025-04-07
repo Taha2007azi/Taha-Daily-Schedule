@@ -14,10 +14,19 @@ st.markdown("""
             margin-bottom: 1rem;
             color: #e0e0e0;
             font-weight: 500;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
+        }
+        .task-done {
+            background-color: #007f5f;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            color: white;
+            font-weight: 500;
+            font-size: 1.1rem;
         }
         .title {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             color: #38b6ff;
             font-weight: bold;
             text-align: center;
@@ -47,22 +56,20 @@ tasks = [
 if 'saturday_task_index' not in st.session_state:
     st.session_state.saturday_task_index = 0
 
-current_index = st.session_state.saturday_task_index
+for i, task in enumerate(tasks):
+    if i < st.session_state.saturday_task_index:
+        st.markdown(f'<div class="task-done">{task} - Done!</div>', unsafe_allow_html=True)
+    elif i == st.session_state.saturday_task_index:
+        checkbox_key = f"task_{i}"
+        if st.checkbox(task, key=checkbox_key):
+            st.session_state.saturday_task_index += 1
+            st.rerun()
+        break  # فقط یکی نمایش داده بشه
 
-if current_index < len(tasks):
-    current_task = tasks[current_index]
-    st.markdown(f'<div class="task-box">{current_task}</div>', unsafe_allow_html=True)
-    task_done = st.checkbox("Done", key=f"task_{current_index}")
-
-    if task_done and st.button("Next"):
-        st.session_state.saturday_task_index += 1
-        st.rerun()  # استفاده رسمی‌تر از rerun
-else:
-    st.success("You’ve completed all tasks for Saturday!")
+if st.session_state.saturday_task_index >= len(tasks):
+    st.success("You’ve completed all Saturday tasks!")
 
     score = st.slider("Rate your performance today (1-5)", 1, 5, 3)
-
-    st.markdown("### Write your daily reflection:")
     report = st.text_area("Your Notes", placeholder="Write something about your day...", height=200, key="saturday_report")
 
     if report:
