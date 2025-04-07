@@ -2,6 +2,27 @@ import streamlit as st
 import json
 import os
 
+# ---------- Login System ----------
+def login():
+    st.title("Login")
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+
+    if st.button("Login"):
+        if username == "taha" and password == "konkur1404":
+            st.session_state.logged_in = True
+        else:
+            st.error("Incorrect username or password.")
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if not st.session_state.logged_in:
+    login()
+    st.stop()
+# ---------- End Login System ----------
+
+# بقیه برنامه همون نسخه‌ایه که دادی...
 st.set_page_config(page_title="Weekly Plan", layout="wide")
 
 # جمله انگیزشی
@@ -21,6 +42,9 @@ st.markdown(f"""
         {motivational_text}
     </div>
 """, unsafe_allow_html=True)
+
+# باقی کدت بدون تغییر ادامه داره...
+
 
 DATA_FILE = "task_status.json"
 
