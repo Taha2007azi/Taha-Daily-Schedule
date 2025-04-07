@@ -2,7 +2,7 @@ import streamlit as st
 
 st.set_page_config(page_title="برنامه روزانه طاها", layout="centered")
 
-# رنگ پس‌زمینه برای هر روز
+# رنگ‌های خاص و خفن
 colors = {
     "شنبه": "#1E2A38",
     "یکشنبه": "#2C3E50",
@@ -13,7 +13,7 @@ colors = {
     "جمعه": "#4A3F35"
 }
 
-# برنامه هفتگی
+# برنامه هفتگی (ساعت + عنوان اولیه)
 weekly_schedule = {
     "شنبه": [
         ("۵:۰۰ – ۵:۳۰", "آزادسازی ذهن"),
@@ -66,54 +66,45 @@ weekly_schedule = {
     ]
 }
 
-# استایل کلی
+# رنگ و عنوان
 st.markdown(
-    "<h1 style='text-align: center; color: #F39C12;'>برنامه روزانه طاها</h1>",
+    "<h1 style='text-align: center; color: #1ABC9C;'>برنامه روزانه طاها</h1>",
     unsafe_allow_html=True
 )
 st.markdown("<h4 style='text-align: center; color: #BDC3C7;'>با قدرت جلو برو طاها!</h4>", unsafe_allow_html=True)
 
+# انتخاب روز
 selected_day = st.selectbox("انتخاب روز:", list(weekly_schedule.keys()))
 
-# استایل رنگی برای روز انتخاب‌شده
-st.markdown(f"""
+# رنگ بک‌گراند
+st.markdown(
+    f"""
     <style>
         .stApp {{
             background-color: {colors[selected_day]};
             color: #ECF0F1;
+            font-family: 'Tahoma', sans-serif;
         }}
-        .block-container {{
-            padding-top: 2rem;
+        .stCheckbox > div {{
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
         }}
     </style>
-""", unsafe_allow_html=True)
+    """,
+    unsafe_allow_html=True
+)
 
 st.subheader(f"برنامه‌ی روز {selected_day}")
 
-# تابع برای ساخت هر آیتم برنامه
-def show_task_block(index, time, task_text):
+# نمایش برنامه با تیک و یادداشت
+for idx, (time, default_task) in enumerate(weekly_schedule[selected_day]):
     st.markdown("---")
-    simple_key = f"{selected_day[:2]}_{index}"  # کلید ساده‌تر
     cols = st.columns([1, 3, 4])
     with cols[0]:
         st.markdown(f"<b>{time}</b>", unsafe_allow_html=True)
     with cols[1]:
-        task = st.text_input("فعالیت", value=task_text, key=f"task_{simple_key}")
-        done = st.checkbox("انجام شد؟", key=f"done_{simple_key}")
+        task = st.text_input(f"فعالیت_{selected_day}_{idx}", value=default_task, key=f"task_{selected_day}_{idx}")
+        done = st.checkbox("انجام شد؟", key=f"done_{selected_day}_{idx}")
     with cols[2]:
-        note = st.text_area("یادداشت", height=50, key=f"note_{simple_key}")
-def show_task_block(index, time, task_text):
-    st.markdown("---")
-    simple_key = f"{selected_day[:2]}_{index}"  # کلید ساده‌تر
-    cols = st.columns([1, 3, 4])
-    with cols[0]:
-        st.markdown(f"<b>{time}</b>", unsafe_allow_html=True)
-    with cols[1]:
-        task = st.text_input("فعالیت", value=task_text, key=f"task_{simple_key}")
-        done = st.checkbox("انجام شد؟", key=f"done_{simple_key}")
-    with cols[2]:
-        note = st.text_area("یادداشت", height=50, key=f"note_{simple_key}")
-
-# اجرای برنامه‌ی روز انتخاب‌شده
-for idx, (time_slot, default_text) in enumerate(weekly_schedule[selected_day]):
-    show_task_block(idx, time_slot, default_text)
+        note = st.text_area(f"یادداشت_{selected_day}_{idx}", height=50, key=f"note_{selected_day}_{idx}")
