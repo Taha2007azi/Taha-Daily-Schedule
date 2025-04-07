@@ -87,10 +87,35 @@ st.markdown("""
             font-weight: 500;
             font-size: 1.1rem;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
         .task-done {
             background-color: #007f5f !important;
             color: white !important;
+            pointer-events: none;
+        }
+        .custom-button {
+            display: inline-block;
+            padding: 0.6rem 1.5rem;
+            border-radius: 10px;
+            background-color: #1f7a8c;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border: none;
+            transition: background-color 0.3s ease;
+            margin-top: 1rem;
+            width: 100%;
+            text-align: center;
+        }
+        .custom-button:hover {
+            background-color: #136a75;
+        }
+        .reset-button {
+            background-color: #bf0603;
+        }
+        .reset-button:hover {
+            background-color: #a00402;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -114,25 +139,25 @@ if selected_day not in st.session_state.temp_status:
 
 # نمایش تسک‌ها
 for i, task in enumerate(tasks):
-    task_key = f"{selected_day}_{i}"
     if st.session_state.temp_status[selected_day][i]:
         st.markdown(f'<div class="task-box task-done">{task}</div>', unsafe_allow_html=True)
     else:
-        if st.button(task, key=task_key):
+        if st.button(f"✔️ {task}", key=f"{selected_day}_{i}"):
             st.session_state.temp_status[selected_day][i] = True
             st.rerun()
-        else:
-            st.markdown(f'<div class="task-box">{task}</div>', unsafe_allow_html=True)
 
-# دکمه‌های Apply و Reset
+# دکمه‌های Apply و Reset با استایل زیبا
 col1, col2 = st.columns(2)
 with col1:
-    if st.button("✅ Apply"):
+    apply_btn = st.markdown('<button class="custom-button">✅ Apply</button>', unsafe_allow_html=True)
+    if st.button("", key="apply_hidden"):
         saved_status_data[selected_day] = st.session_state.temp_status[selected_day][:]
         with open(DATA_FILE, "w") as f:
             json.dump(saved_status_data, f)
         st.success("Changes applied and saved!")
+
 with col2:
-    if st.button("❌ Reset"):
+    reset_btn = st.markdown('<button class="custom-button reset-button">❌ Reset</button>', unsafe_allow_html=True)
+    if st.button("", key="reset_hidden"):
         st.session_state.temp_status[selected_day] = [False] * len(tasks)
         st.rerun()
