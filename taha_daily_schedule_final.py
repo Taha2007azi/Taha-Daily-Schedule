@@ -1,11 +1,12 @@
 import streamlit as st
 import json
 import os
+import tempfile
 
 st.set_page_config(page_title="Taha's Daily Schedule", layout="centered")
 
-# File to save state
-SAVE_FILE = "schedule_state.json"
+# Safe file path for Streamlit Cloud
+SAVE_FILE = os.path.join(tempfile.gettempdir(), "schedule_state.json")
 
 # Load saved state if exists
 if os.path.exists(SAVE_FILE):
@@ -112,14 +113,10 @@ st.markdown(
 for idx, (time, default_text) in enumerate(schedule[selected_day]):
     task_key = f"{selected_day}_{idx}"
 
-    task_data = saved_state.get(task_key, {})
-    task_text = task_data.get("task", default_text)
-    done1 = task_data.get("done1", False)
-    done2 = task_data.get("done2", False)
-    try:
-        note = task_data.get("note", "")
-    except:
-        note = ""
+    task_text = saved_state.get(task_key, {}).get("task", default_text)
+    done1 = saved_state.get(task_key, {}).get("done1", False)
+    done2 = saved_state.get(task_key, {}).get("done2", False)
+    note = saved_state.get(task_key, {}).get("note", "")
 
     block_color = highlight_color if done1 and done2 else "rgba(255, 255, 255, 0.05)"
 
@@ -129,17 +126,13 @@ for idx, (time, default_text) in enumerate(schedule[selected_day]):
     with cols[0]:
         st.markdown(f"<b>{time}</b>", unsafe_allow_html=True)
     with cols[1]:
-        task_input_key = f"task_{task_key}"
-        task_text = st.text_input("Task", value=task_text, key=task_input_key)
+        task_text = st.text_input("Task", value=task_text, key=f"task_{task_key}")
     with cols[2]:
-        done1_key = f"done1_{task_key}"
-        done2_key = f"done2_{task_key}"
-        done1 = st.checkbox("Check 1", value=done1, key=done1_key)
+        done1 = st.checkbox("Check 1", value=done1, key=f"done1_{task_key}")
         if done1:
-            done2 = st.checkbox("Check 2", value=done2, key=done2_key)
+            done2 = st.checkbox("Check 2", value=done2, key=f"done2_{task_key}")
     with cols[3]:
-        note_key = f"note_{task_key}"
-        note = st.text_area("Note", value=note, height=50, key=note_key)
+        note = st.text_area("Note", value=note, height=50, key=f"note_{task_key}")
 
     st.markdown("</div>", unsafe_allow_html=True)
 
