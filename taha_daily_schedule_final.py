@@ -164,7 +164,7 @@ if selected_day != "Nothing":
                 json.dump(saved_status_data, f)
             st.success("Changes and note saved!")
 
-                if reset_click:
+        if reset_click:
             st.session_state.temp_status[selected_day] = [False] * len(tasks)
             saved_status_data[selected_day] = [False] * len(tasks)
             saved_status_data[note_key] = ""
