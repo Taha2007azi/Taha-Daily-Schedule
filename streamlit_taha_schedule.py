@@ -1,82 +1,82 @@
 import streamlit as st
 
-st.set_page_config(page_title="برنامه روزانه طاها", layout="centered")
+st.set_page_config(page_title="Taha's Daily Schedule", layout="centered")
 
-# رنگ‌های خاص و خفن
+# Colors per day
 colors = {
-    "شنبه": "#1E2A38",
-    "یکشنبه": "#2C3E50",
-    "دوشنبه": "#34495E",
-    "سه‌شنبه": "#22313F",
-    "چهارشنبه": "#1F3A3D",
-    "پنج‌شنبه": "#2E4053",
-    "جمعه": "#4A3F35"
+    "Saturday": "#1E2A38",
+    "Sunday": "#2C3E50",
+    "Monday": "#34495E",
+    "Tuesday": "#22313F",
+    "Wednesday": "#1F3A3D",
+    "Thursday": "#2E4053",
+    "Friday": "#4A3F35"
 }
 
-# برنامه هفتگی (ساعت + عنوان اولیه)
+# Weekly schedule
 weekly_schedule = {
-    "شنبه": [
-        ("۵:۰۰ – ۵:۳۰", "آزادسازی ذهن"),
-        ("۵:۳۰ – ۶:۰۰", "ورزش"),
-        ("۶:۰۰ – ۷:۳۰", "زبان"),
-        ("۸:۰۰ – ۱۵:۰۰", "مدرسه"),
-        ("۱۵:۰۰ – ۱۶:۰۰", "استراحت"),
-        ("۱۶:۰۰ – ۲۳:۰۰", "مطالعه کنکور + استراحت و ناهار")
+    "Saturday": [
+        ("05:00 – 05:30", "Mind release"),
+        ("05:30 – 06:00", "Workout"),
+        ("06:00 – 07:30", "English"),
+        ("08:00 – 15:00", "School"),
+        ("15:00 – 16:00", "Rest"),
+        ("16:00 – 23:00", "Study + Lunch/Breaks")
     ],
-    "یکشنبه": [
-        ("۵:۰۰ – ۵:۳۰", "آزادسازی ذهن"),
-        ("۵:۳۰ – ۶:۰۰", "ورزش"),
-        ("۶:۰۰ – ۷:۳۰", "زبان"),
-        ("۸:۰۰ – ۱۵:۰۰", "مدرسه"),
-        ("۱۵:۰۰ – ۱۶:۰۰", "استراحت"),
-        ("۱۶:۰۰ – ۲۳:۰۰", "کلاس زبان")
+    "Sunday": [
+        ("05:00 – 05:30", "Mind release"),
+        ("05:30 – 06:00", "Workout"),
+        ("06:00 – 07:30", "English"),
+        ("08:00 – 15:00", "School"),
+        ("15:00 – 16:00", "Rest"),
+        ("16:00 – 23:00", "English Class")
     ],
-    "دوشنبه": [
-        ("۵:۰۰ – ۵:۳۰", "آزادسازی ذهن"),
-        ("۵:۳۰ – ۶:۰۰", "ورزش"),
-        ("۶:۰۰ – ۷:۳۰", "زبان"),
-        ("۸:۰۰ – ۲۳:۰۰", "۱۰ ساعت مطالعه کنکور + استراحت‌ها")
+    "Monday": [
+        ("05:00 – 05:30", "Mind release"),
+        ("05:30 – 06:00", "Workout"),
+        ("06:00 – 07:30", "English"),
+        ("08:00 – 23:00", "Study (10 hrs) + Breaks")
     ],
-    "سه‌شنبه": [
-        ("۵:۰۰ – ۵:۳۰", "آزادسازی ذهن"),
-        ("۵:۳۰ – ۶:۰۰", "ورزش"),
-        ("۶:۰۰ – ۷:۳۰", "زبان"),
-        ("۸:۰۰ – ۱۵:۰۰", "مدرسه"),
-        ("۱۵:۰۰ – ۱۶:۰۰", "استراحت"),
-        ("۱۶:۰۰ – ۲۳:۰۰", "کلاس زبان")
+    "Tuesday": [
+        ("05:00 – 05:30", "Mind release"),
+        ("05:30 – 06:00", "Workout"),
+        ("06:00 – 07:30", "English"),
+        ("08:00 – 15:00", "School"),
+        ("15:00 – 16:00", "Rest"),
+        ("16:00 – 23:00", "English Class")
     ],
-    "چهارشنبه": [
-        ("۵:۰۰ – ۵:۳۰", "آزادسازی ذهن"),
-        ("۵:۳۰ – ۶:۰۰", "ورزش"),
-        ("۶:۰۰ – ۷:۳۰", "زبان"),
-        ("۸:۰۰ – ۲۳:۰۰", "۱۰ ساعت مطالعه کنکور + استراحت‌ها")
+    "Wednesday": [
+        ("05:00 – 05:30", "Mind release"),
+        ("05:30 – 06:00", "Workout"),
+        ("06:00 – 07:30", "English"),
+        ("08:00 – 23:00", "Study (10 hrs) + Breaks")
     ],
-    "پنج‌شنبه": [
-        ("۸:۰۰ – ۸:۳۰", "آزادسازی ذهن"),
-        ("۸:۳۰ – ۹:۰۰", "ورزش"),
-        ("۹:۰۰ – ۱۰:۳۰", "زبان"),
-        ("۱۰:۳۰ – ۲۳:۰۰", "۱۰ ساعت مطالعه کنکور + استراحت‌ها")
+    "Thursday": [
+        ("08:00 – 08:30", "Mind release"),
+        ("08:30 – 09:00", "Workout"),
+        ("09:00 – 10:30", "English"),
+        ("10:30 – 23:00", "Study (10 hrs) + Breaks")
     ],
-    "جمعه": [
-        ("۵:۰۰ – ۵:۳۰", "آزادسازی ذهن"),
-        ("۵:۳۰ – ۶:۰۰", "ورزش"),
-        ("۶:۰۰ – ۷:۳۰", "زبان"),
-        ("۸:۰۰ – ۱۸:۰۰", "کلاس آنلاین برنامه‌نویسی"),
-        ("۱۸:۰۰ – ۲۱:۰۰", "مرور زبان یا کنکور")
+    "Friday": [
+        ("05:00 – 05:30", "Mind release"),
+        ("05:30 – 06:00", "Workout"),
+        ("06:00 – 07:30", "English"),
+        ("08:00 – 18:00", "Online Programming Class"),
+        ("18:00 – 21:00", "Review (English or Study)")
     ]
 }
 
-# رابط کاربری
+# Header
 st.markdown(
-    "<h1 style='text-align: center; color: #F1C40F;'>برنامه روزانه طاها</h1>",
+    "<h1 style='text-align: center; color: #F7DC6F;'>Taha's Daily Schedule</h1>",
     unsafe_allow_html=True
 )
+st.markdown("<h4 style='text-align: center; color: #BDC3C7;'>Go strong, Taha!</h4>", unsafe_allow_html=True)
 
-st.markdown("<h4 style='text-align: center; color: #BDC3C7;'>با قدرت جلو برو طاها!</h4>", unsafe_allow_html=True)
+# Day selector
+selected_day = st.selectbox("Select a day:", list(weekly_schedule.keys()))
 
-selected_day = st.selectbox("انتخاب روز:", list(weekly_schedule.keys()))
-
-# رنگ بک‌گراند بر اساس روز
+# Styling
 st.markdown(
     f"""
     <style>
@@ -95,21 +95,16 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.subheader(f"برنامه‌ی روز {selected_day}")
+st.subheader(f"{selected_day} Schedule")
 
-# نمایش برنامه
+# Display tasks
 for idx, (time, default_task) in enumerate(weekly_schedule[selected_day]):
     st.markdown("---")
     cols = st.columns([1, 3, 4])
     with cols[0]:
         st.markdown(f"<b>{time}</b>", unsafe_allow_html=True)
-
     with cols[1]:
-        task_key = f"task_{selected_day}_{idx}"
-        done_key = f"done_{selected_day}_{idx}"
-        task = st.text_input("فعالیت", value=default_task, key=task_key)
-        done = st.checkbox("انجام شد؟", key=done_key)
-
+        task = st.text_input("Task", value=default_task, key=f"task_{selected_day}_{idx}")
+        done = st.checkbox("Done?", key=f"done_{selected_day}_{idx}")
     with cols[2]:
-        note_key = f"note_{selected_day}_{idx}"
-        note = st.text_area("یادداشت", height=50, key=note_key)
+        note = st.text_area("Note", height=50, key=f"note_{selected_day}_{idx}")
