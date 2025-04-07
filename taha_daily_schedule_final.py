@@ -55,15 +55,57 @@ st.markdown('<div class="title">Your Full Weekly Planner</div>', unsafe_allow_ht
 # روزها
 days = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 
-# برنامه بدون تایم، فقط تسک‌ها
+# برنامه دقیق هفتگی با تایم‌بندی روتین‌ها و تسک‌ها
 weekly_plan = {
-    "Saturday": ["Study Math", "Review English", "Exercise"],
-    "Sunday": ["Practice Python", "Read Book", "Meditation"],
-    "Monday": ["School", "Language Class", "Homework"],
-    "Tuesday": ["Focus Session", "Mock Test", "Journal"],
-    "Wednesday": ["School", "Project Review", "Rest"],
-    "Thursday": ["Exam Practice", "Gym", "Relaxing Activity"],
-    "Friday": ["Programming Class", "Plan Next Week", "Watch AI Video"]
+    "Saturday": [
+        "05:00 – 05:30: Mental Clearing",
+        "05:30 – 06:00: Exercise",
+        "06:00 – 07:30: English",
+        "08:00 – 15:00: School",
+        "15:00 – 16:00: Rest",
+        "16:00 – 23:00: Konkur Study"
+    ],
+    "Sunday": [
+        "05:00 – 05:30: Mental Clearing",
+        "05:30 – 06:00: Exercise",
+        "06:00 – 07:30: English",
+        "08:00 – 15:00: School",
+        "15:00 – 16:00: Rest",
+        "16:00 – 23:00: Language Class"
+    ],
+    "Monday": [
+        "05:00 – 05:30: Mental Clearing",
+        "05:30 – 06:00: Exercise",
+        "06:00 – 07:30: English",
+        "08:00 – 23:00: Heavy Konkur Study (~10h)"
+    ],
+    "Tuesday": [
+        "05:00 – 05:30: Mental Clearing",
+        "05:30 – 06:00: Exercise",
+        "06:00 – 07:30: English",
+        "08:00 – 15:00: School",
+        "15:00 – 16:00: Rest",
+        "16:00 – 23:00: Language Class"
+    ],
+    "Wednesday": [
+        "05:00 – 05:30: Mental Clearing",
+        "05:30 – 06:00: Exercise",
+        "06:00 – 07:30: English",
+        "08:00 – 23:00: Heavy Konkur Study (~10h)"
+    ],
+    "Thursday": [
+        "08:00 – 08:30: Mental Clearing",
+        "08:30 – 09:00: Exercise",
+        "09:00 – 10:30: English",
+        "10:30 – 23:00: Heavy Konkur Study (~10h)"
+    ],
+    "Friday": [
+        "05:00 – 05:30: Mental Clearing",
+        "05:30 – 06:00: Exercise",
+        "06:00 – 07:30: English",
+        "08:00 – 18:00: Online Programming Class",
+        "18:00 – 21:00: Review the Weekly Material"
+    ]
 }
 
 # رندر کل هفته
