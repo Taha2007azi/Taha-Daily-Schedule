@@ -4,7 +4,24 @@ import os
 
 st.set_page_config(page_title="Weekly Step Planner", layout="wide")
 
-# ---------- Style ----------
+DATA_FILE = "weekly_data.json"
+
+# Load and Save Functions
+def load_data():
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "r") as f:
+            return json.load(f)
+    else:
+        return {}
+
+def save_data(data):
+    with open(DATA_FILE, "w") as f:
+        json.dump(data, f)
+
+# Load data
+data = load_data()
+
+# Styling
 st.markdown("""
     <style>
         body {
@@ -54,28 +71,11 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# ---------- Motivation Message ----------
+# Motivational Message
 st.markdown('<div class="motiv">Every step counts, Taha. Let’s make this week powerful!</div>', unsafe_allow_html=True)
 st.markdown('<div class="title">Your Weekly Step Planner</div>', unsafe_allow_html=True)
 
-# ---------- Data Paths ----------
-DATA_FILE = "data.json"
-
-# ---------- Load or Initialize Data ----------
-def load_data():
-    if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, "r") as f:
-            return json.load(f)
-    else:
-        return {}
-
-def save_data(data):
-    with open(DATA_FILE, "w") as f:
-        json.dump(data, f, indent=4)
-
-data = load_data()
-
-# ---------- Weekly Plan ----------
+# Weekly Plan
 days = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 weekly_plan = {
     "Saturday": [
@@ -129,15 +129,16 @@ weekly_plan = {
     ]
 }
 
-# ---------- UI ----------
+# Select day
 selected_day = st.selectbox("Choose a day:", days)
 
-# Initialize data for day if not exists
+# Initialize day if not exists
 if selected_day not in data:
     data[selected_day] = {"index": 0, "score": 3, "report": ""}
+    save_data(data)
 
+# Show tasks
 st.markdown(f"### {selected_day}")
-
 tasks = weekly_plan[selected_day]
 index = data[selected_day]["index"]
 
@@ -152,12 +153,15 @@ for i, task in enumerate(tasks):
             st.rerun()
         break
 
+# Finished all
 if index >= len(tasks):
     st.success(f"All tasks for {selected_day} completed!")
 
+    # Rating
     score = st.slider("Rate your performance today (1–5)", 1, 5, data[selected_day]["score"], key=f"{selected_day}_score")
     data[selected_day]["score"] = score
 
+    # Reflection
     st.markdown("### Daily Reflection:")
     report = st.text_area("Your Notes", value=data[selected_day]["report"], placeholder="Write your thoughts about today...", height=200, key=f"{selected_day}_report")
     data[selected_day]["report"] = report
@@ -165,4 +169,5 @@ if index >= len(tasks):
     if report:
         st.markdown(f"<div class='custom-textarea'>{report}</div>", unsafe_allow_html=True)
 
+    # Save updates
     save_data(data)
