@@ -4,29 +4,36 @@ import os
 
 st.set_page_config(page_title="Weekly Step Planner", layout="wide")
 
-DATA_FILE = "weekly_data.json"
-
-def load_data():
-    if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, "r") as f:
-            return json.load(f)
-    return {}
-
-def save_data(data):
-    with open(DATA_FILE, "w") as f:
-        json.dump(data, f)
-
-data = load_data()
-
-# Style
+# ---------- Style ----------
 st.markdown("""
     <style>
+        body {
+            background-color: #1e1e2f;
+        }
         .title {
             font-size: 2.5rem;
             color: #38b6ff;
             font-weight: bold;
             text-align: center;
             margin-bottom: 2rem;
+        }
+        .task-box {
+            background-color: #2b2d42;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            color: #e0e0e0;
+            font-weight: 500;
+            font-size: 1.2rem;
+        }
+        .task-done {
+            background-color: #007f5f;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            color: white;
+            font-weight: 500;
+            font-size: 1.2rem;
         }
         .motiv {
             background: linear-gradient(to right, #38b6ff, #00b4d8);
@@ -36,30 +43,6 @@ st.markdown("""
             text-align: center;
             font-size: 1.1rem;
             margin-bottom: 2rem;
-        }
-        .task-button {
-            width: 100%;
-            text-align: left;
-            padding: 1rem;
-            border: none;
-            border-radius: 12px;
-            margin-bottom: 1rem;
-            font-size: 1.2rem;
-            font-weight: 500;
-            color: #e0e0e0;
-            background-color: #2b2d42;
-        }
-        .task-button-done {
-            width: 100%;
-            text-align: left;
-            padding: 1rem;
-            border: none;
-            border-radius: 12px;
-            margin-bottom: 1rem;
-            font-size: 1.2rem;
-            font-weight: 500;
-            color: white;
-            background-color: #007f5f;
         }
         .custom-textarea {
             font-family: 'Courier New', monospace;
@@ -71,10 +54,28 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# UI
+# ---------- Motivation Message ----------
 st.markdown('<div class="motiv">Every step counts, Taha. Let’s make this week powerful!</div>', unsafe_allow_html=True)
 st.markdown('<div class="title">Your Weekly Step Planner</div>', unsafe_allow_html=True)
 
+# ---------- Data Paths ----------
+DATA_FILE = "data.json"
+
+# ---------- Load or Initialize Data ----------
+def load_data():
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "r") as f:
+            return json.load(f)
+    else:
+        return {}
+
+def save_data(data):
+    with open(DATA_FILE, "w") as f:
+        json.dump(data, f, indent=4)
+
+data = load_data()
+
+# ---------- Weekly Plan ----------
 days = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 weekly_plan = {
     "Saturday": [
@@ -128,35 +129,35 @@ weekly_plan = {
     ]
 }
 
-# Day selection
+# ---------- UI ----------
 selected_day = st.selectbox("Choose a day:", days)
-tasks = weekly_plan[selected_day]
 
+# Initialize data for day if not exists
 if selected_day not in data:
-    data[selected_day] = {"done": [False]*len(tasks), "score": 3, "report": ""}
-    save_data(data)
+    data[selected_day] = {"index": 0, "score": 3, "report": ""}
 
-# Show task buttons
 st.markdown(f"### {selected_day}")
-for i, task in enumerate(tasks):
-    is_done = data[selected_day]["done"][i]
-    css_class = "task-button-done" if is_done else "task-button"
-    button_label = f"{task} {'✓' if is_done else ''}"
-    if st.button(button_label, key=f"{selected_day}_{i}"):
-        data[selected_day]["done"][i] = not is_done
-        save_data(data)
-        st.rerun()
-    st.markdown(f'<div class="{css_class}">{task}</div>', unsafe_allow_html=True)
 
-# When all tasks done
-if all(data[selected_day]["done"]):
+tasks = weekly_plan[selected_day]
+index = data[selected_day]["index"]
+
+for i, task in enumerate(tasks):
+    if i < index:
+        st.markdown(f'<div class="task-done">{task} - Done!</div>', unsafe_allow_html=True)
+    elif i == index:
+        st.markdown(f'<div class="task-box">{task}</div>', unsafe_allow_html=True)
+        if st.checkbox("Mark as done", key=f"{selected_day}_{i}"):
+            data[selected_day]["index"] += 1
+            save_data(data)
+            st.rerun()
+        break
+
+if index >= len(tasks):
     st.success(f"All tasks for {selected_day} completed!")
 
-    # Rating
     score = st.slider("Rate your performance today (1–5)", 1, 5, data[selected_day]["score"], key=f"{selected_day}_score")
     data[selected_day]["score"] = score
 
-    # Reflection
     st.markdown("### Daily Reflection:")
     report = st.text_area("Your Notes", value=data[selected_day]["report"], placeholder="Write your thoughts about today...", height=200, key=f"{selected_day}_report")
     data[selected_day]["report"] = report
