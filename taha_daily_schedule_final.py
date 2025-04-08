@@ -2,6 +2,27 @@ import streamlit as st
 import json
 import os
 
+# ---------- Login System ----------
+def login():
+    st.title("Login")
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+
+    if st.button("Login"):
+        if username == "taha2007azi" and password == "_20TaHa07_":
+            st.session_state.logged_in = True
+        else:
+            st.error("Incorrect username or password.")
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if not st.session_state.logged_in:
+    login()
+    st.stop()
+# ---------- End Login System ----------
+
+# ---------- Main App ----------
 st.set_page_config(page_title="Weekly Plan", layout="wide")
 
 motivational_text = "“Push yourself, because no one else is going to do it for you.”"
@@ -23,6 +44,7 @@ st.markdown(f"""
 
 DATA_FILE = "task_status.json"
 
+# Load or create status file
 if not os.path.exists(DATA_FILE):
     with open(DATA_FILE, "w") as f:
         json.dump({}, f)
@@ -83,6 +105,7 @@ weekly_plan = {
     ]
 }
 
+# ---------- Style ----------
 st.markdown("""
     <style>
         .title {
@@ -121,27 +144,11 @@ if selected_day != "Nothing":
     if selected_day not in saved_status_data:
         saved_status_data[selected_day] = [False] * len(tasks)
 
-    if "temp_status" not in st.session_state:
+if "temp_status" not in st.session_state:
         st.session_state.temp_status = {}
     if selected_day not in st.session_state.temp_status:
         st.session_state.temp_status[selected_day] = saved_status_data[selected_day][:]
 
-    if f"{selected_day}_extra_tasks" not in saved_status_data:
-        saved_status_data[f"{selected_day}_extra_tasks"] = []
-        saved_status_data[f"{selected_day}_extra_status"] = []
-
-    if f"{selected_day}_extra_tasks" not in st.session_state:
-        st.session_state[f"{selected_day}_extra_tasks"] = saved_status_data[f"{selected_day}_extra_tasks"][:]
-        st.session_state[f"{selected_day}_extra_status"] = saved_status_data[f"{selected_day}_extra_status"][:]
-
-    with st.expander("➕ Add a new task"):
-        new_task = st.text_input("Type your custom task")
-        if st.button("Add Task") and new_task.strip():
-            st.session_state[f"{selected_day}_extra_tasks"].append(new_task)
-            st.session_state[f"{selected_day}_extra_status"].append(False)
-            st.rerun()
-
-    st.markdown("---")
     for i, task in enumerate(tasks):
         if st.session_state.temp_status[selected_day][i]:
             st.markdown(f'<div class="task-box task-done">{task}</div>', unsafe_allow_html=True)
@@ -150,29 +157,15 @@ if selected_day != "Nothing":
                 st.session_state.temp_status[selected_day][i] = True
                 st.rerun()
 
-    for i, task in enumerate(st.session_state[f"{selected_day}_extra_tasks"]):
-        if st.session_state[f"{selected_day}_extra_status"][i]:
-            if st.button(f"✅ {task}", key=f"extra_done_{i}"):
-                st.session_state[f"{selected_day}_extra_status"][i] = False
-                st.rerun()
-            st.markdown(f'<div class="task-box task-done">{task}</div>', unsafe_allow_html=True)
-        else:
-            if st.button(f"☐ {task}", key=f"extra_{i}"):
-                st.session_state[f"{selected_day}_extra_status"][i] = True
-                st.rerun()
-
     st.markdown("### Notes")
     note_key = f"{selected_day}_note"
-
     if note_key not in saved_status_data:
         saved_status_data[note_key] = ""
 
-    if note_key not in st.session_state:
-        st.session_state[note_key] = saved_status_data.get(note_key, "")
-
-    st.text_area(
+    note_text = st.text_area(
         "Write your daily report or notes here:",
         key=note_key,
+        value=saved_status_data[note_key],
         height=150
     )
 
@@ -186,8 +179,6 @@ if selected_day != "Nothing":
         if apply_click:
             saved_status_data[selected_day] = st.session_state.temp_status[selected_day][:]
             saved_status_data[note_key] = st.session_state[note_key]
-            saved_status_data[f"{selected_day}_extra_tasks"] = st.session_state[f"{selected_day}_extra_tasks"][:]
-            saved_status_data[f"{selected_day}_extra_status"] = st.session_state[f"{selected_day}_extra_status"][:]
             with open(DATA_FILE, "w") as f:
                 json.dump(saved_status_data, f)
             st.success("Changes and note saved!")
@@ -198,10 +189,8 @@ if selected_day != "Nothing":
             saved_status_data[note_key] = ""
             if note_key in st.session_state:
                 del st.session_state[note_key]
-            st.session_state[f"{selected_day}_extra_tasks"] = []
-            st.session_state[f"{selected_day}_extra_status"] = []
-            saved_status_data[f"{selected_day}_extra_tasks"] = []
-            saved_status_data[f"{selected_day}_extra_status"] = []
+            if "text_area" in st.session_state:
+                del st.session_state["text_area"]
             with open(DATA_FILE, "w") as f:
                 json.dump(saved_status_data, f)
             st.success(f"{selected_day} has been reset successfully!")
