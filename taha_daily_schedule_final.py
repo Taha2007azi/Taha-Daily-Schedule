@@ -2,11 +2,12 @@ import streamlit as st
 import json
 import os
 
-# ---------- Login ----------
+# ---------- Login System ----------
 def login():
     st.title("Login")
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
+
     if st.button("Login"):
         if username == "taha2007azi" and password == "_20TaHa07_":
             st.session_state.logged_in = True
@@ -19,11 +20,11 @@ if "logged_in" not in st.session_state:
 if not st.session_state.logged_in:
     login()
     st.stop()
+# ---------- End Login System ----------
 
-# ---------- Config ----------
-st.set_page_config(page_title="Taha's Plan", layout="wide")
+st.set_page_config(page_title="Weekly Plan", layout="wide")
+
 DATA_FILE = "task_status.json"
-
 if not os.path.exists(DATA_FILE):
     with open(DATA_FILE, "w") as f:
         json.dump({}, f)
@@ -31,113 +32,70 @@ if not os.path.exists(DATA_FILE):
 with open(DATA_FILE, "r") as f:
     saved_status_data = json.load(f)
 
-# ---------- Plan ----------
+# ---------- Weekly Plan ----------
 days = ["Nothing", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 weekly_plan = {
-    "Saturday": [
-        "05:00 – 05:30: Mind Clearing",
-        "05:30 – 06:00: Workout",
-        "06:00 – 07:30: English",
-        "08:00 – 15:00: School",
-        "15:00 – 16:00: Rest",
-        "16:00 – 23:00: Study for Konkur"
-    ],
-    "Sunday": [
-        "05:00 – 05:30: Mind Clearing",
-        "05:30 – 06:00: Workout",
-        "06:00 – 07:30: English",
-        "08:00 – 15:00: School",
-        "15:00 – 16:30: Rest",
-        "16:30 – 23:00: Language Class + Rest"
-    ],
-    "Monday": [
-        "05:00 – 05:30: Mind Clearing",
-        "05:30 – 06:00: Workout",
-        "06:00 – 07:30: English",
-        "Study: 08:00 – 18:00 (10hr plan)"
-    ],
-    "Tuesday": [
-        "05:00 – 05:30: Mind Clearing",
-        "05:30 – 06:00: Workout",
-        "06:00 – 07:30: English",
-        "08:00 – 15:00: School",
-        "15:00 – 16:30: Rest",
-        "16:30 – 23:00: Language Class + Rest"
-    ],
-    "Wednesday": [
-        "05:00 – 05:30: Mind Clearing",
-        "05:30 – 06:00: Workout",
-        "06:00 – 07:30: English",
-        "Study: 08:00 – 18:00 (10hr plan)"
-    ],
-    "Thursday": [
-        "08:00 – 08:30: Mind Clearing",
-        "08:30 – 09:00: Workout",
-        "09:00 – 10:30: English",
-        "Study: 10:30 – 21:30 (10hr plan)"
-    ],
-    "Friday": [
-        "08:00 – 08:30: Mind Clearing",
-        "08:30 – 09:00: Workout",
-        "09:00 – 10:30: English",
-        "10:30 – 18:00: Programming Class"
-    ],
+    "Saturday": ["05:00 – 05:30: Mind Clearing", "05:30 – 06:00: Workout"],
+    "Sunday": ["06:00 – 07:30: English", "08:00 – 15:00: School"],
 }
 
-# ---------- CSS ----------
 st.markdown("""
     <style>
-    div.stButton > button {
-        background: none;
-        border: none;
-        padding: 10px 0;
-        color: white;
-        font-size: 1.1rem;
-        text-align: left;
-        width: 100%;
-        transition: all 0.3s ease;
-    }
-    div.stButton > button:hover {
-        background-color: #444444;
-    }
-    .completed > button {
-        background-color: #2ecc71 !important;
-        color: white !important;
-        font-weight: bold;
-    }
+        .task-box {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            background-color: #2b2d42;
+            color: #e0e0e0;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .task-box.done {
+            background-color: #00a676 !important;
+            color: white !important;
+        }
+        .clickable {
+            cursor: pointer;
+        }
     </style>
 """, unsafe_allow_html=True)
 
-# ---------- UI ----------
-selected_day = st.selectbox("Select a day:", days)
+selected_day = st.selectbox("Choose a day:", days)
 
 if selected_day != "Nothing":
     tasks = weekly_plan[selected_day]
 
-    if selected_day not in saved_status_data:
-        saved_status_data[selected_day] = [False] * len(tasks)
-
     if "task_status" not in st.session_state:
-        st.session_state.task_status = saved_status_data
+        st.session_state.task_status = {}
 
-    st.subheader(f"Plan for {selected_day}")
+    if selected_day not in st.session_state.task_status:
+        st.session_state.task_status[selected_day] = saved_status_data.get(selected_day, [False]*len(tasks))
 
     for i, task in enumerate(tasks):
         task_key = f"{selected_day}_{i}"
-        status = st.session_state.task_status[selected_day][i]
 
-        container = st.container()
-        with container:
-            if status:
-                with st.container():
-                    st.markdown(f"""
-                        <div class="completed">
-                            <button disabled>{task}</button>
-                        </div>
-                    """, unsafe_allow_html=True)
-            else:
-                if st.button(task, key=task_key):
-                    st.session_state.task_status[selected_day][i] = True
-                    saved_status_data[selected_day][i] = True
-                    with open(DATA_FILE, "w") as f:
-                        json.dump(saved_status_data, f)
+        status = st.session_state.task_status[selected_day][i]
+        div_class = "task-box clickable done" if status else "task-box clickable"
+
+        if st.markdown(f"""
+            <div class="{div_class}" onclick="fetch('/?toggle={task_key}').then(() => window.location.reload())">
+                {task}
+            </div>
+        """, unsafe_allow_html=True):
+            pass
+
+    # Update query params manually
+    query_params = st.query_params
+    if "toggle" in query_params:
+        task_key = query_params["toggle"][0]
+        day, idx = task_key.split("_")
+        idx = int(idx)
+        st.session_state.task_status[day][idx] = not st.session_state.task_status[day][idx]
+
+        # Save
+        saved_status_data[day] = st.session_state.task_status[day]
+        with open(DATA_FILE, "w") as f:
+            json.dump(saved_status_data, f)
+        st.query_params.clear()
+        st.rerun()
