@@ -7,7 +7,7 @@ from email.message import EmailMessage
 # ---------- Email Sender ----------
 def send_report(subject, content):
     sender = "Taha.app11339_azi@gmail.com"
-    password = "YOUR_APP_PASSWORD"  # جایگزین کن با App Password
+    password = "fyzi qudv zqbm huib"  # جایگزین کن با App Password
     receiver = "tahaanzabi2007@gmail.com"
 
     msg = EmailMessage()
