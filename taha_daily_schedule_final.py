@@ -1,199 +1,134 @@
+# Taha's Final Daily Schedule App
 import streamlit as st
 import json
 import os
+from datetime import datetime
 
-# ---------- Login System ----------
-def login():
-    st.title("Login")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-
-    if st.button("Login"):
-        if username == "taha2007azi" and password == "_20TaHa07_":
-            st.session_state.logged_in = True
-        else:
-            st.error("Incorrect username or password.")
-
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-
-if not st.session_state.logged_in:
-    login()
-    st.stop()
-# ---------- End Login System ----------
-
-# ---------- Main App ----------
-st.set_page_config(page_title="Weekly Plan", layout="wide")
-
-motivational_text = "“Push yourself, because no one else is going to do it for you.”"
-st.markdown(f"""
-    <div style='
-        text-align: center;
-        font-size: 1.8rem;
-        font-weight: bold;
-        color: #4dd0e1;
-        margin: 2rem 0;
-        padding: 1rem;
-        background-color: #1e1e1e;
-        border-radius: 12px;
-        box-shadow: 0 0 15px rgba(0,0,0,0.3);
-    '>
-        {motivational_text}
-    </div>
-""", unsafe_allow_html=True)
-
-DATA_FILE = "task_status.json"
-
-# Load or create status file
-if not os.path.exists(DATA_FILE):
-    with open(DATA_FILE, "w") as f:
-        json.dump({}, f)
-
-with open(DATA_FILE, "r") as f:
-    saved_status_data = json.load(f)
-
-days = ["Nothing", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
-weekly_plan = {
-    "Saturday": [
-        "05:00 – 05:30: Mind Clearing",
-        "05:30 – 06:00: Workout",
-        "06:00 – 07:30: English",
-        "08:00 – 15:00: School",
-        "15:00 – 16:00: Rest",
-        "16:00 – 23:00: Study for Konkur"
-    ],
-    "Sunday": [
-        "05:00 – 05:30: Mind Clearing",
-        "05:30 – 06:00: Workout",
-        "06:00 – 07:30: English",
-        "08:00 – 15:00: School",
-        "15:00 – 16:00: Rest",
-        "16:00 – 23:00: Language Class"
-    ],
-    "Monday": [
-        "05:00 – 05:30: Mind Clearing",
-        "05:30 – 06:00: Workout",
-        "06:00 – 07:30: English",
-        "08:00 – 23:00: Heavy Konkur Study (~10h)"
-    ],
-    "Tuesday": [
-        "05:00 – 05:30: Mind Clearing",
-        "05:30 – 06:00: Workout",
-        "06:00 – 07:30: English",
-        "08:00 – 15:00: School",
-        "15:00 – 16:00: Rest",
-        "16:00 – 23:00: Language Class"
-    ],
-    "Wednesday": [
-        "05:00 – 05:30: Mind Clearing",
-        "05:30 – 06:00: Workout",
-        "06:00 – 07:30: English",
-        "08:00 – 23:00: Heavy Konkur Study (~10h)"
-    ],
-    "Thursday": [
-        "08:00 – 08:30: Mind Clearing",
-        "08:30 – 09:00: Workout",
-        "09:00 – 10:30: English",
-        "10:30 – 23:00: Heavy Konkur Study (~10h)"
-    ],
-    "Friday": [
-        "05:00 – 05:30: Mind Clearing",
-        "05:30 – 06:00: Workout",
-        "06:00 – 07:30: English",
-        "08:00 – 18:00: Online Programming Class",
-        "18:00 – 21:00: Review the Weekly Material"
-    ]
-}
-
-# ---------- Style ----------
+# -------------------- Config --------------------
+st.set_page_config(page_title="Taha's Daily Schedule", layout="wide")
 st.markdown("""
     <style>
-        .title {
-            font-size: 2.5rem;
-            color: #38b6ff;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 2rem;
+        .done-task {
+            background-color: #203040;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 5px;
         }
-        .task-box {
-            background-color: #2b2d42;
-            padding: 1rem;
+        .task-block {
+            background-color: #1c1f26;
             border-radius: 12px;
-            margin-bottom: 1rem;
-            color: #e0e0e0;
-            font-weight: 500;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
-        .task-done {
-            background-color: #007f5f !important;
-            color: white !important;
-            pointer-events: none;
+        .check-btns button {
+            margin-right: 10px;
+            backdrop-filter: blur(5px);
         }
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="title">Your Weekly Plan</div>', unsafe_allow_html=True)
-
-selected_day = st.selectbox("Choose a day:", days)
-
-if selected_day != "Nothing":
-    tasks = weekly_plan[selected_day]
-
-    if selected_day not in saved_status_data:
-        saved_status_data[selected_day] = [False] * len(tasks)
-
-    if "temp_status" not in st.session_state:
-        st.session_state.temp_status = {}
-    if selected_day not in st.session_state.temp_status:
-        st.session_state.temp_status[selected_day] = saved_status_data[selected_day][:]
-
-    for i, task in enumerate(tasks):
-        if st.session_state.temp_status[selected_day][i]:
-            st.markdown(f'<div class="task-box task-done">{task}</div>', unsafe_allow_html=True)
-        else:
-            if st.button(f"✔️ {task}", key=f"{selected_day}_{i}"):
-                st.session_state.temp_status[selected_day][i] = True
-                st.rerun()
-
-    st.markdown("### Notes")
-    note_key = f"{selected_day}_note"
-    if note_key not in saved_status_data:
-        saved_status_data[note_key] = ""
-
-    note_text = st.text_area(
-        "Write your daily report or notes here:",
-        key=note_key,
-        value=saved_status_data[note_key],
-        height=150
-    )
-
-    with st.form(key="action_form"):
-        col1, col2 = st.columns(2)
-        with col1:
-            apply_click = st.form_submit_button(label="✅ Apply")
-        with col2:
-            reset_click = st.form_submit_button(label="❌ Reset")
-
-        if apply_click:
-            saved_status_data[selected_day] = st.session_state.temp_status[selected_day][:]
-            saved_status_data[note_key] = st.session_state[note_key]
-            with open(DATA_FILE, "w") as f:
-                json.dump(saved_status_data, f)
-            st.success("Changes and note saved!")
-
-        if reset_click:
-            st.session_state.temp_status[selected_day] = [False] * len(tasks)
-            saved_status_data[selected_day] = [False] * len(tasks)
-            saved_status_data[note_key] = ""
-            if note_key in st.session_state:
-                st.session_state.pop(note_key)  # اینجا درست شد
-            with open(DATA_FILE, "w") as f:
-                json.dump(saved_status_data, f)
-            st.success(f"{selected_day} has been reset successfully!")
+# -------------------- User Login --------------------
+def login():
+    st.title("Login")
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+    if st.button("Login"):
+        if username == "taha2007azi" and password == "_20TaHa07_":
+            st.session_state.logged_in = True
             st.rerun()
+        else:
+            st.error("Wrong credentials")
 
+if "logged_in" not in st.session_state:
+    login()
+    st.stop()
 
-else:
-    st.markdown("### No tasks today. Enjoy your time or take a break!")
+# -------------------- Save/Load --------------------
+SAVE_FILE = "saved_state.json"
+def load_state():
+    if os.path.exists(SAVE_FILE):
+        with open(SAVE_FILE, "r") as f:
+            return json.load(f)
+    return {}
+
+def save_state():
+    with open(SAVE_FILE, "w") as f:
+        json.dump(st.session_state.to_dict(), f)
+
+state_data = load_state()
+for key, val in state_data.items():
+    st.session_state[key] = val
+
+# -------------------- Daily Plan --------------------
+daily_schedule = {
+    "Saturday": ["Wake up & Routine", "School", "Study Time"],
+    "Sunday": ["Wake up & Routine", "School", "Language Class"],
+    "Monday": ["Wake up & Routine", "Heavy Study"],
+    "Tuesday": ["Wake up & Routine", "School", "Language Class"],
+    "Wednesday": ["Wake up & Routine", "Heavy Study"],
+    "Thursday": ["Wake up Late", "Heavy Study"],
+    "Friday": ["Wake up & Routine", "Programming Class"]
+}
+
+# -------------------- Functions --------------------
+def render_day(day, tasks):
+    st.subheader(day)
+    for task in tasks:
+        key1 = f"{day}_{task}_check1"
+        key2 = f"{day}_{task}_check2"
+        note_key = f"{day}_{task}_note"
+
+        if key1 not in st.session_state:
+            st.session_state[key1] = False
+        if key2 not in st.session_state:
+            st.session_state[key2] = False
+        if note_key not in st.session_state:
+            st.session_state[note_key] = ""
+
+        with st.container():
+            col1, col2 = st.columns([0.6, 0.4])
+            with col1:
+                st.markdown(f"### {task}")
+                if not st.session_state[key1]:
+                    if st.checkbox("Check 1", key=key1):
+                        st.rerun()
+                elif not st.session_state[key2]:
+                    if st.checkbox("Check 2", key=key2):
+                        st.success("Done!")
+                        st.rerun()
+                else:
+                    st.markdown(
+                        f"<div class='done-task'><b>{task}</b> - Completed</div>", unsafe_allow_html=True)
+            with col2:
+                st.text_area("Note", key=note_key, height=100)
+
+# -------------------- UI Layout --------------------
+st.title("Taha's Full Daily Schedule")
+day = st.selectbox("Choose a day", list(daily_schedule.keys()))
+render_day(day, daily_schedule[day])
+
+colA, colB, colC = st.columns(3)
+with colA:
+    if st.button("Apply"):
+        save_state()
+        st.success("Saved!")
+with colB:
+    if st.button("Reset"):
+        for task in daily_schedule[day]:
+            st.session_state[f"{day}_{task}_check1"] = False
+            st.session_state[f"{day}_{task}_check2"] = False
+            st.session_state[f"{day}_{task}_note"] = ""
+        save_state()
+        st.rerun()
+with colC:
+    if st.button("Reset ALL"):
+        for d, tasks in daily_schedule.items():
+            for task in tasks:
+                st.session_state[f"{d}_{task}_check1"] = False
+                st.session_state[f"{d}_{task}_check2"] = False
+                st.session_state[f"{d}_{task}_note"] = ""
+        save_state()
+        st.rerun()
+
+# -------------------- END --------------------
