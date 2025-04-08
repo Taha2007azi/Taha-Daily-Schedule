@@ -1,4 +1,3 @@
-
 import streamlit as st
 import json
 import os
@@ -23,7 +22,6 @@ if not st.session_state.logged_in:
     st.stop()
 # ---------- End Login System ----------
 
-# ---------- Main App ----------
 st.set_page_config(page_title="Weekly Plan", layout="wide")
 
 motivational_text = "“Push yourself, because no one else is going to do it for you.”"
@@ -44,12 +42,9 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 DATA_FILE = "task_status.json"
-
-# Load or create status file
 if not os.path.exists(DATA_FILE):
     with open(DATA_FILE, "w") as f:
         json.dump({}, f)
-
 with open(DATA_FILE, "r") as f:
     saved_status_data = json.load(f)
 
@@ -124,13 +119,15 @@ st.markdown("""
             color: #e0e0e0;
             font-weight: 500;
             font-size: 1.1rem;
+            transition: 0.2s;
+        }
+        .task-box:hover {
+            background-color: #3d4059;
             cursor: pointer;
-            transition: background-color 0.3s ease;
         }
         .task-done {
-            background-color: #007f5f !important;
-            color: white !important;
-            pointer-events: none;
+            background-color: #006d77 !important;
+            color: #ffffff !important;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -145,31 +142,40 @@ if selected_day != "Nothing":
     if selected_day not in saved_status_data:
         saved_status_data[selected_day] = [False] * len(tasks)
 
-if "temp_status" not in st.session_state:
+    if "temp_status" not in st.session_state:
         st.session_state.temp_status = {}
     if selected_day not in st.session_state.temp_status:
         st.session_state.temp_status[selected_day] = saved_status_data[selected_day][:]
 
     for i, task in enumerate(tasks):
+        key = f"{selected_day}_{i}"
         if st.session_state.temp_status[selected_day][i]:
             st.markdown(f'<div class="task-box task-done">{task}</div>', unsafe_allow_html=True)
         else:
-            if st.button(f"✔️ {task}", key=f"{selected_day}_{i}"):
-                st.session_state.temp_status[selected_day][i] = True
-                st.rerun()
+            if st.markdown(f'<a href="?clicked={key}" class="task-box">{task}</a>', unsafe_allow_html=True):
+                pass
 
+    # Check for task clicks via URL params
+    query_params = st.experimental_get_query_params()
+    clicked = query_params.get("clicked", [None])[0]
+    if clicked and clicked.startswith(selected_day):
+        idx = int(clicked.split("_")[1])
+        st.session_state.temp_status[selected_day][idx] = True
+        st.experimental_set_query_params()
+        st.rerun()
+
+    # ---------- Notes ----------
     st.markdown("### Notes")
     note_key = f"{selected_day}_note"
-    if note_key not in saved_status_data:
-        saved_status_data[note_key] = ""
-
+    note_val = saved_status_data.get(note_key, "")
     note_text = st.text_area(
         "Write your daily report or notes here:",
-        key=note_key,
-        value=saved_status_data[note_key],
+        value=note_val,
+        key=f"note_{selected_day}",
         height=150
     )
 
+    # ---------- Buttons ----------
     with st.form(key="action_form"):
         col1, col2 = st.columns(2)
         with col1:
@@ -179,7 +185,7 @@ if "temp_status" not in st.session_state:
 
         if apply_click:
             saved_status_data[selected_day] = st.session_state.temp_status[selected_day][:]
-            saved_status_data[note_key] = st.session_state[note_key]
+            saved_status_data[note_key] = note_text
             with open(DATA_FILE, "w") as f:
                 json.dump(saved_status_data, f)
             st.success("Changes and note saved!")
@@ -188,10 +194,6 @@ if "temp_status" not in st.session_state:
             st.session_state.temp_status[selected_day] = [False] * len(tasks)
             saved_status_data[selected_day] = [False] * len(tasks)
             saved_status_data[note_key] = ""
-            if note_key in st.session_state:
-                del st.session_state[note_key]
-            if "text_area" in st.session_state:
-                del st.session_state["text_area"]
             with open(DATA_FILE, "w") as f:
                 json.dump(saved_status_data, f)
             st.success(f"{selected_day} has been reset successfully!")
