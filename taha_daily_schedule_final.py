@@ -149,13 +149,14 @@ if "temp_status" not in st.session_state:
     if selected_day not in st.session_state.temp_status:
         st.session_state.temp_status[selected_day] = saved_status_data[selected_day][:]
 
-    for i, task in enumerate(tasks):
-        if st.session_state.temp_status[selected_day][i]:
-            st.markdown(f'<div class="task-box task-done">{task}</div>', unsafe_allow_html=True)
-        else:
-            if st.button(f"✔️ {task}", key=f"{selected_day}_{i}"):
-                st.session_state.temp_status[selected_day][i] = True
-                st.rerun()
+    button_label = "✅" if st.session_state.temp_status[selected_day][i] else "☑️"
+if st.button(f"{button_label} {task}", key=f"{selected_day}_{i}"):
+    st.session_state.temp_status[selected_day][i] = not st.session_state.temp_status[selected_day][i]
+    st.rerun()
+
+task_class = "task-box task-done" if st.session_state.temp_status[selected_day][i] else "task-box"
+st.markdown(f'<div class="{task_class}">{task}</div>', unsafe_allow_html=True)
+
 
     st.markdown("### Notes")
     note_key = f"{selected_day}_note"
