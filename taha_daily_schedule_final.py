@@ -6,7 +6,7 @@ from email.message import EmailMessage
 
 # ---------- Email Sender ----------
 def send_report(subject, content):
-    sender = "Taha.app11339_azi@gmail.com"
+    sender = "TahaStreamlitApp@gmail.com"
     password = "yrso kgam eltg oroc"  # App password
     receiver = "tahaanzabi2007@gmail.com"
 
