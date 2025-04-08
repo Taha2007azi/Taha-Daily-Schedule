@@ -181,7 +181,7 @@ if selected_day != "Nothing":
         if reset_click:
             st.session_state.temp_status[selected_day] = [False] * len(tasks)
             saved_status_data[selected_day] = [False] * len(tasks)
-            with open(DATA_FILE, "w") as f:
+            with open(DATAILE,note_text, "w") as f:
                 json.dump(saved_status_data, f)
             st.success(f"{selected_day} has been reset (tasks only)!")
             st.rerun()
