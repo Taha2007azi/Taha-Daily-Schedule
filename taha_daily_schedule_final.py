@@ -191,6 +191,7 @@ if selected_day != "Nothing":
             if note_key in st.session_state:
                 del st.session_state[note_key]
 
+
             with open(DATA_FILE, "w") as f:
                 json.dump(saved_status_data, f)
 
