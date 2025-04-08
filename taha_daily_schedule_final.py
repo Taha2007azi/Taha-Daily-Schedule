@@ -209,14 +209,16 @@ if selected_day != "Nothing":
             saved_status_data[selected_day] = [False] * len(tasks)
             saved_status_data[note_key] = ""
 
-            if note_key in st.session_state:
-                del st.session_state[note_key]
+        # حذف کلید از session_state حتی اگر هنوز ساخته نشده
+    
+            st.session_state[note_key] = ""
 
             with open(DATA_FILE, "w") as f:
                 json.dump(saved_status_data, f)
 
             st.success(f"{selected_day} has been reset successfully!")
             st.rerun()
+
 
 else:
     st.markdown("### No tasks today. Enjoy your time or take a break!")
