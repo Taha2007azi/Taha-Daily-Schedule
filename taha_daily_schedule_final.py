@@ -119,17 +119,17 @@ st.markdown("""
             background-color: #2b2d42;
             padding: 1rem;
             border-radius: 12px;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
             color: #e0e0e0;
             font-weight: 500;
             font-size: 1.1rem;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
         .task-done {
             background-color: #007f5f !important;
             color: white !important;
-            pointer-events: none;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -144,19 +144,22 @@ if selected_day != "Nothing":
     if selected_day not in saved_status_data:
         saved_status_data[selected_day] = [False] * len(tasks)
 
-if "temp_status" not in st.session_state:
+    if "temp_status" not in st.session_state:
         st.session_state.temp_status = {}
     if selected_day not in st.session_state.temp_status:
         st.session_state.temp_status[selected_day] = saved_status_data[selected_day][:]
 
-    button_label = "✅" if st.session_state.temp_status[selected_day][i] else "☑️"
-if st.button(f"{button_label} {task}", key=f"{selected_day}_{i}"):
-    st.session_state.temp_status[selected_day][i] = not st.session_state.temp_status[selected_day][i]
-    st.rerun()
-
-task_class = "task-box task-done" if st.session_state.temp_status[selected_day][i] else "task-box"
-st.markdown(f'<div class="{task_class}">{task}</div>', unsafe_allow_html=True)
-
+    for i, task in enumerate(tasks):
+        status = st.session_state.temp_status[selected_day][i]
+        icon = "✅" if status else "☑️"
+        col1, col2 = st.columns([0.1, 0.9])
+        with col1:
+            if st.button(icon, key=f"btn_{selected_day}_{i}"):
+                st.session_state.temp_status[selected_day][i] = not status
+                st.rerun()
+        with col2:
+            box_class = "task-box task-done" if status else "task-box"
+            st.markdown(f'<div class="{box_class}">{task}</div>', unsafe_allow_html=True)
 
     st.markdown("### Notes")
     note_key = f"{selected_day}_note"
