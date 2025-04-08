@@ -181,9 +181,10 @@ if selected_day != "Nothing":
         if reset_click:
             st.session_state.temp_status[selected_day] = [False] * len(tasks)
             saved_status_data[selected_day] = [False] * len(tasks)
-            with open(DATAILE,note_text, "w") as f:
+            saved_status_data[note_key] = ""  # ریست کردن یادداشت
+            with open(DATA_FILE, "w") as f:
                 json.dump(saved_status_data, f)
-            st.success(f"{selected_day} has been reset (tasks only)!")
+            st.success(f"{selected_day} has been reset (tasks and note)!")
             st.rerun()
 else:
     st.markdown("### No tasks today. Enjoy your time or take a break!")
