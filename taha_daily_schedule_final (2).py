@@ -2,6 +2,27 @@ import streamlit as st
 import json
 import os
 
+# ---------- Login System ----------
+def login():
+    st.title("Login")
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+
+    if st.button("Login"):
+        if username == "taha2007azi" and password == "_20TaHa07_":
+            st.session_state.logged_in = True
+        else:
+            st.error("Incorrect username or password.")
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if not st.session_state.logged_in:
+    login()
+    st.stop()
+# ---------- End Login System ----------
+
+# بقیه برنامه همون نسخه‌ایه که دادی...
 st.set_page_config(page_title="Weekly Plan", layout="wide")
 
 # جمله انگیزشی
@@ -22,6 +43,9 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
+# باقی کدت بدون تغییر ادامه داره...
+
+
 DATA_FILE = "task_status.json"
 
 # Load or create status file
@@ -33,7 +57,7 @@ with open(DATA_FILE, "r") as f:
     saved_status_data = json.load(f)
 
 # برنامه‌ی هفتگی
-days = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+days = ["Nothing", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 weekly_plan = {
     "Saturday": [
         "05:00 – 05:30: Mind Clearing",
@@ -118,60 +142,70 @@ st.markdown("""
 st.markdown('<div class="title">Your Weekly Plan</div>', unsafe_allow_html=True)
 
 selected_day = st.selectbox("Choose a day:", days)
-tasks = weekly_plan[selected_day]
 
-# مقداردهی اولیه
-if selected_day not in saved_status_data:
-    saved_status_data[selected_day] = [False] * len(tasks)
+if selected_day != "Nothing":
+    tasks = weekly_plan[selected_day]
 
-# کپی برای تغییرات موقت
-if "temp_status" not in st.session_state:
-    st.session_state.temp_status = {}
-if selected_day not in st.session_state.temp_status:
-    st.session_state.temp_status[selected_day] = saved_status_data[selected_day][:]
-
-# نمایش تسک‌ها
-for i, task in enumerate(tasks):
-    if st.session_state.temp_status[selected_day][i]:
-        st.markdown(f'<div class="task-box task-done">{task}</div>', unsafe_allow_html=True)
-    else:
-        if st.button(f"✔️ {task}", key=f"{selected_day}_{i}"):
-            st.session_state.temp_status[selected_day][i] = True
-            st.rerun()
-
-# --- نوت‌گذاری برای هر روز ---
-st.markdown("### Notes")
-note_key = f"{selected_day}_note"
-if note_key not in saved_status_data:
-    saved_status_data[note_key] = ""
-
-note_text = st.text_area("Write your daily report or notes here:", value=saved_status_data[note_key], height=150)
-
-# --- دکمه‌های Apply و Reset ---
-with st.form(key="action_form"):
-    col1, col2 = st.columns(2)
-    with col1:
-        apply_click = st.form_submit_button(label="✅ Apply")
-    with col2:
-        reset_click = st.form_submit_button(label="❌ Reset")
-
-    if apply_click:
-        saved_status_data[selected_day] = st.session_state.temp_status[selected_day][:]
-        saved_status_data[note_key] = note_text
-        with open(DATA_FILE, "w") as f:
-            json.dump(saved_status_data, f)
-        st.success("Changes and note saved!")
-
-    if reset_click:
-        # ریست کامل تسک‌ها
-        st.session_state.temp_status[selected_day] = [False] * len(tasks)
+    # مقداردهی اولیه
+    if selected_day not in saved_status_data:
         saved_status_data[selected_day] = [False] * len(tasks)
 
-        # ریست کامل نوت‌ها
-        saved_status_data[note_key] = ""
-        if note_key in st.session_state:
-            del st.session_state[note_key]
+    # کپی برای تغییرات موقت
+    if "temp_status" not in st.session_state:
+        st.session_state.temp_status = {}
+    if selected_day not in st.session_state.temp_status:
+        st.session_state.temp_status[selected_day] = saved_status_data[selected_day][:]
 
-        with open(DATA_FILE, "w") as f:
-            json.dump(saved_status_data, f)
-        st.rerun()
+    # نمایش تسک‌ها
+    for i, task in enumerate(tasks):
+        if st.session_state.temp_status[selected_day][i]:
+            st.markdown(f'<div class="task-box task-done">{task}</div>', unsafe_allow_html=True)
+        else:
+            if st.button(f"✔️ {task}", key=f"{selected_day}_{i}"):
+                st.session_state.temp_status[selected_day][i] = True
+                st.rerun()
+
+        # نوت‌گذاری برای هر روز
+    st.markdown("### Notes")
+    note_key = f"{selected_day}_note"
+    if note_key not in saved_status_data:
+        saved_status_data[note_key] = ""
+
+    note_text = st.text_area(
+        "Write your daily report or notes here:",
+        key=note_key,
+        value=saved_status_data[note_key],
+        height=150
+    )
+
+    # دکمه‌های Apply و Reset
+    with st.form(key="action_form"):
+        col1, col2 = st.columns(2)
+        with col1:
+            apply_click = st.form_submit_button(label="✅ Apply")
+        with col2:
+            reset_click = st.form_submit_button(label="❌ Reset")
+
+        if apply_click:
+            saved_status_data[selected_day] = st.session_state.temp_status[selected_day][:]
+            saved_status_data[note_key] = st.session_state[note_key]
+            with open(DATA_FILE, "w") as f:
+                json.dump(saved_status_data, f)
+            st.success("Changes and note saved!")
+
+        if reset_click:
+            st.session_state.temp_status[selected_day] = [False] * len(tasks)
+            saved_status_data[selected_day] = [False] * len(tasks)
+            saved_status_data[note_key] = ""
+            if note_key in st.session_state:
+                del st.session_state[note_key]
+            if "text_area" in st.session_state:
+                del st.session_state["text_area"]
+            with open(DATA_FILE, "w") as f:
+                json.dump(saved_status_data, f)
+            st.success(f"{selected_day} has been reset successfully!")
+            st.rerun()
+
+
+else:
+    st.markdown("### No tasks today. Enjoy your time or take a break!")
