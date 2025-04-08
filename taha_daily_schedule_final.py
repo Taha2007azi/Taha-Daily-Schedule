@@ -20,7 +20,6 @@ if "logged_in" not in st.session_state:
 if not st.session_state.logged_in:
     login()
     st.stop()
-# ---------- End Login System ----------
 
 # ---------- Main App ----------
 st.set_page_config(page_title="Weekly Plan", layout="wide")
@@ -108,33 +107,25 @@ weekly_plan = {
 # ---------- Style ----------
 st.markdown("""
     <style>
-        .title {
-            font-size: 2.5rem;
-            color: #38b6ff;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 2rem;
-        }
         .task-box {
-            background-color: #2b2d42;
             padding: 1rem;
             border-radius: 12px;
-            margin-bottom: 0.5rem;
-            color: #e0e0e0;
+            margin-bottom: 1rem;
             font-weight: 500;
             font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            cursor: pointer;
+            background-color: #2b2d42;
+            color: #e0e0e0;
+            transition: background-color 0.3s ease;
         }
-        .task-done {
+        .task-box-done {
             background-color: #007f5f !important;
             color: white !important;
         }
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="title">Your Weekly Plan</div>', unsafe_allow_html=True)
+st.markdown('<h2 style="text-align:center; color:#38b6ff;">Your Weekly Plan</h2>', unsafe_allow_html=True)
 
 selected_day = st.selectbox("Choose a day:", days)
 
@@ -150,18 +141,13 @@ if selected_day != "Nothing":
         st.session_state.temp_status[selected_day] = saved_status_data[selected_day][:]
 
     for i, task in enumerate(tasks):
-        status = st.session_state.temp_status[selected_day][i]
-        icon = "✅" if status else "☑️"
-        col1, col2 = st.columns([0.1, 0.9])
-        with col1:
-            if st.button(icon, key=f"btn_{selected_day}_{i}"):
-                st.session_state.temp_status[selected_day][i] = not status
-                st.rerun()
-        with col2:
-            box_class = "task-box task-done" if status else "task-box"
-            st.markdown(f'<div class="{box_class}">{task}</div>', unsafe_allow_html=True)
+        is_done = st.session_state.temp_status[selected_day][i]
+        task_class = "task-box-done" if is_done else ""
+        if st.button(task, key=f"task_{selected_day}_{i}"):
+            st.session_state.temp_status[selected_day][i] = not is_done
+            st.rerun()
+        st.markdown(f'<div class="task-box {task_class}">{task}</div>', unsafe_allow_html=True)
 
-    st.markdown("### Notes")
     note_key = f"{selected_day}_note"
     if note_key not in saved_status_data:
         saved_status_data[note_key] = ""
