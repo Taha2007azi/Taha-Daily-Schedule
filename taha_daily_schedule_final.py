@@ -22,7 +22,6 @@ if not st.session_state.logged_in:
     st.stop()
 # ---------- End Login System ----------
 
-# ---------- Main App ----------
 st.set_page_config(page_title="Weekly Plan", layout="wide")
 
 motivational_text = "“Push yourself, because no one else is going to do it for you.”"
@@ -43,69 +42,23 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 DATA_FILE = "task_status.json"
-
-# Load or create status file
 if not os.path.exists(DATA_FILE):
     with open(DATA_FILE, "w") as f:
         json.dump({}, f)
-
 with open(DATA_FILE, "r") as f:
     saved_status_data = json.load(f)
 
 days = ["Nothing", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 weekly_plan = {
-    "Saturday": [
-        "05:00 – 05:30: Mind Clearing",
-        "05:30 – 06:00: Workout",
-        "06:00 – 07:30: English",
-        "08:00 – 15:00: School",
-        "15:00 – 16:00: Rest",
-        "16:00 – 23:00: Study for Konkur"
-    ],
-    "Sunday": [
-        "05:00 – 05:30: Mind Clearing",
-        "05:30 – 06:00: Workout",
-        "06:00 – 07:30: English",
-        "08:00 – 15:00: School",
-        "15:00 – 16:00: Rest",
-        "16:00 – 23:00: Language Class"
-    ],
-    "Monday": [
-        "05:00 – 05:30: Mind Clearing",
-        "05:30 – 06:00: Workout",
-        "06:00 – 07:30: English",
-        "08:00 – 23:00: Heavy Konkur Study (~10h)"
-    ],
-    "Tuesday": [
-        "05:00 – 05:30: Mind Clearing",
-        "05:30 – 06:00: Workout",
-        "06:00 – 07:30: English",
-        "08:00 – 15:00: School",
-        "15:00 – 16:00: Rest",
-        "16:00 – 23:00: Language Class"
-    ],
-    "Wednesday": [
-        "05:00 – 05:30: Mind Clearing",
-        "05:30 – 06:00: Workout",
-        "06:00 – 07:30: English",
-        "08:00 – 23:00: Heavy Konkur Study (~10h)"
-    ],
-    "Thursday": [
-        "08:00 – 08:30: Mind Clearing",
-        "08:30 – 09:00: Workout",
-        "09:00 – 10:30: English",
-        "10:30 – 23:00: Heavy Konkur Study (~10h)"
-    ],
-    "Friday": [
-        "05:00 – 05:30: Mind Clearing",
-        "05:30 – 06:00: Workout",
-        "06:00 – 07:30: English",
-        "08:00 – 18:00: Online Programming Class",
-        "18:00 – 21:00: Review the Weekly Material"
-    ]
+    "Saturday": ["05:00 – 05:30: Mind Clearing", "05:30 – 06:00: Workout", "06:00 – 07:30: English", "08:00 – 15:00: School", "15:00 – 16:00: Rest", "16:00 – 23:00: Study for Konkur"],
+    "Sunday": ["05:00 – 05:30: Mind Clearing", "05:30 – 06:00: Workout", "06:00 – 07:30: English", "08:00 – 15:00: School", "15:00 – 16:00: Rest", "16:00 – 23:00: Language Class"],
+    "Monday": ["05:00 – 05:30: Mind Clearing", "05:30 – 06:00: Workout", "06:00 – 07:30: English", "08:00 – 23:00: Heavy Konkur Study (~10h)"],
+    "Tuesday": ["05:00 – 05:30: Mind Clearing", "05:30 – 06:00: Workout", "06:00 – 07:30: English", "08:00 – 15:00: School", "15:00 – 16:00: Rest", "16:00 – 23:00: Language Class"],
+    "Wednesday": ["05:00 – 05:30: Mind Clearing", "05:30 – 06:00: Workout", "06:00 – 07:30: English", "08:00 – 23:00: Heavy Konkur Study (~10h)"],
+    "Thursday": ["08:00 – 08:30: Mind Clearing", "08:30 – 09:00: Workout", "09:00 – 10:30: English", "10:30 – 23:00: Heavy Konkur Study (~10h)"],
+    "Friday": ["05:00 – 05:30: Mind Clearing", "05:30 – 06:00: Workout", "06:00 – 07:30: English", "08:00 – 18:00: Online Programming Class", "18:00 – 21:00: Review the Weekly Material"]
 }
 
-# ---------- Style ----------
 st.markdown("""
     <style>
         .title {
@@ -187,16 +140,11 @@ if selected_day != "Nothing":
             st.session_state.temp_status[selected_day] = [False] * len(tasks)
             saved_status_data[selected_day] = [False] * len(tasks)
             saved_status_data[note_key] = ""
-
             if note_key in st.session_state:
                 del st.session_state[note_key]
-
-
             with open(DATA_FILE, "w") as f:
                 json.dump(saved_status_data, f)
-
             st.success(f"{selected_day} has been reset successfully!")
             st.rerun()
-
 else:
     st.markdown("### No tasks today. Enjoy your time or take a break!")
