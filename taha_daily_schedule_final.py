@@ -24,23 +24,6 @@ if not st.session_state.logged_in:
 
 st.set_page_config(page_title="Weekly Plan", layout="wide")
 
-motivational_text = "“Push yourself, because no one else is going to do it for you.”"
-st.markdown(f"""
-    <div style='
-        text-align: center;
-        font-size: 1.8rem;
-        font-weight: bold;
-        color: #4dd0e1;
-        margin: 2rem 0;
-        padding: 1rem;
-        background-color: #1e1e1e;
-        border-radius: 12px;
-        box-shadow: 0 0 15px rgba(0,0,0,0.3);
-    '>
-        {motivational_text}
-    </div>
-""", unsafe_allow_html=True)
-
 DATA_FILE = "task_status.json"
 
 if not os.path.exists(DATA_FILE):
@@ -103,33 +86,27 @@ weekly_plan = {
     ]
 }
 
+# ---------- Style ----------
 st.markdown("""
     <style>
-        .title {
-            font-size: 2.5rem;
-            color: #38b6ff;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 2rem;
-        }
         .task {
-            padding: 0.75rem 1rem;
-            margin-bottom: 0.5rem;
-            border-radius: 8px;
-            background-color: #2c2f4a;
-            color: #e0e0e0;
-            font-size: 1rem;
-            cursor: pointer;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 10px;
+            background-color: #2b2d42;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 500;
             transition: background-color 0.3s ease;
+            cursor: pointer;
         }
         .task.done {
             background-color: #28a745 !important;
-            color: white !important;
         }
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="title">Your Weekly Plan</div>', unsafe_allow_html=True)
+st.markdown("<h1 style='text-align:center; color:#4dd0e1;'>Your Weekly Plan</h1>", unsafe_allow_html=True)
 
 selected_day = st.selectbox("Choose a day:", days)
 
@@ -139,38 +116,33 @@ if selected_day != "Nothing":
     if selected_day not in saved_status_data:
         saved_status_data[selected_day] = [False] * len(tasks)
 
-    if "clicked" not in st.session_state:
-        st.session_state.clicked = {}
-    if selected_day not in st.session_state.clicked:
-        st.session_state.clicked[selected_day] = saved_status_data[selected_day][:]
+    if "task_status" not in st.session_state:
+        st.session_state.task_status = saved_status_data
 
     for i, task in enumerate(tasks):
-        task_class = "task done" if st.session_state.clicked[selected_day][i] else "task"
-        task_html = f"<div class='{task_class}' onclick=\"window.location.href='/?clicked={selected_day}_{i}'\">{task}</div>"
-        st.markdown(task_html, unsafe_allow_html=True)
+        status = st.session_state.task_status[selected_day][i]
+        class_name = "task done" if status else "task"
+        if st.markdown(f"<div class='{class_name}' onClick='window.location.href=\"?task={i}\"'>{task}</div>", unsafe_allow_html=True):
+            pass
 
-    query_params = st.experimental_get_query_params()
-    if "clicked" in query_params:
-        clicked_val = query_params["clicked"][0]
-        day_key, idx_str = clicked_val.split("_")
-        idx = int(idx_str)
-        if day_key in st.session_state.clicked:
-            st.session_state.clicked[day_key][idx] = not st.session_state.clicked[day_key][idx]
-        st.experimental_set_query_params()  # clear after processing
+    query_params = st.query_params
+    if "task" in query_params:
+        task_id = int(query_params["task"][0])
+        st.session_state.task_status[selected_day][task_id] = not st.session_state.task_status[selected_day][task_id]
+        saved_status_data[selected_day] = st.session_state.task_status[selected_day]
+        with open(DATA_FILE, "w") as f:
+            json.dump(saved_status_data, f)
+        st.experimental_rerun()
 
-    with st.form(key="actions"):
-        col1, col2 = st.columns(2)
-        if col1.form_submit_button("✅ Apply"):
-            saved_status_data[selected_day] = st.session_state.clicked[selected_day][:]
-            with open(DATA_FILE, "w") as f:
-                json.dump(saved_status_data, f)
-            st.success("Changes saved!")
+    note_key = f"{selected_day}_note"
+    note = st.text_area("Write notes for the day:", value=saved_status_data.get(note_key, ""), height=150)
+    
+    if st.button("Save Note"):
+        saved_status_data[note_key] = note
+        with open(DATA_FILE, "w") as f:
+            json.dump(saved_status_data, f)
+        st.success("Note saved!")
 
-        if col2.form_submit_button("❌ Reset"):
-            st.session_state.clicked[selected_day] = [False] * len(tasks)
-            saved_status_data[selected_day] = [False] * len(tasks)
-            with open(DATA_FILE, "w") as f:
-                json.dump(saved_status_data, f)
-            st.rerun()
 else:
-    st.markdown("### No tasks today. Enjoy your time or take a break!")
+    st.info("No tasks today. Enjoy your free time!")
+
