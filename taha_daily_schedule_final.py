@@ -159,13 +159,12 @@ if selected_day != "Nothing":
 
     st.markdown("### Notes")
     note_key = f"{selected_day}_note"
-    if note_key not in saved_status_data:
-        saved_status_data[note_key] = ""
+    default_note = saved_status_data.get(note_key, "")
 
     note_text = st.text_area(
         "Write your daily report or notes here:",
-        key=note_key,
-        value=saved_status_data[note_key],
+        key="note_input",
+        value=default_note,
         height=150
     )
 
@@ -178,21 +177,23 @@ if selected_day != "Nothing":
 
         if apply_click:
             saved_status_data[selected_day] = st.session_state.temp_status[selected_day][:]
-            saved_status_data[note_key] = st.session_state[note_key]
+            saved_status_data[note_key] = st.session_state["note_input"]
             with open(DATA_FILE, "w") as f:
                 json.dump(saved_status_data, f)
             st.success("Changes and note saved!")
 
         if reset_click:
+            # Reset task status
             st.session_state.temp_status[selected_day] = [False] * len(tasks)
             saved_status_data[selected_day] = [False] * len(tasks)
+            
+            # Reset notes
             saved_status_data[note_key] = ""
-            if note_key in st.session_state:
-                del st.session_state[note_key]
-            if "text_area" in st.session_state:
-                del st.session_state["text_area"]
+            st.session_state["note_input"] = ""
+            
             with open(DATA_FILE, "w") as f:
                 json.dump(saved_status_data, f)
+
             st.success(f"{selected_day} has been reset successfully!")
             st.rerun()
 else:
