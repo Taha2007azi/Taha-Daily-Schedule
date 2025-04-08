@@ -7,7 +7,6 @@ def login():
     st.title("Login")
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
-
     if st.button("Login"):
         if username == "taha2007azi" and password == "_20TaHa07_":
             st.session_state.logged_in = True
@@ -16,15 +15,14 @@ def login():
 
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
-
 if not st.session_state.logged_in:
     login()
     st.stop()
 # ---------- End Login System ----------
 
-# ---------- Main App ----------
 st.set_page_config(page_title="Weekly Plan", layout="wide")
 
+# انگیزشی
 motivational_text = "“Push yourself, because no one else is going to do it for you.”"
 st.markdown(f"""
     <div style='
@@ -42,16 +40,15 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
+# فایل داده
 DATA_FILE = "task_status.json"
-
-# Load or create status file
 if not os.path.exists(DATA_FILE):
     with open(DATA_FILE, "w") as f:
         json.dump({}, f)
-
 with open(DATA_FILE, "r") as f:
     saved_status_data = json.load(f)
 
+# برنامه هفتگی
 days = ["Nothing", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 weekly_plan = {
     "Saturday": [
@@ -105,7 +102,7 @@ weekly_plan = {
     ]
 }
 
-# ---------- Style ----------
+# استایل
 st.markdown("""
     <style>
         .title {
@@ -133,16 +130,18 @@ st.markdown("""
         }
     </style>
 """, unsafe_allow_html=True)
-
 st.markdown('<div class="title">Your Weekly Plan</div>', unsafe_allow_html=True)
 
 selected_day = st.selectbox("Choose a day:", days)
 
 if selected_day != "Nothing":
     tasks = weekly_plan[selected_day]
+    note_key = f"{selected_day}_note"
 
     if selected_day not in saved_status_data:
         saved_status_data[selected_day] = [False] * len(tasks)
+    if note_key not in saved_status_data:
+        saved_status_data[note_key] = ""
 
     if "temp_status" not in st.session_state:
         st.session_state.temp_status = {}
@@ -158,13 +157,10 @@ if selected_day != "Nothing":
                 st.rerun()
 
     st.markdown("### Notes")
-    note_key = f"{selected_day}_note"
-    default_note = saved_status_data.get(note_key, "")
-
     note_text = st.text_area(
         "Write your daily report or notes here:",
-        key="note_input",
-        value=default_note,
+        key=note_key,
+        value=saved_status_data[note_key],
         height=150
     )
 
@@ -177,24 +173,17 @@ if selected_day != "Nothing":
 
         if apply_click:
             saved_status_data[selected_day] = st.session_state.temp_status[selected_day][:]
-            saved_status_data[note_key] = st.session_state["note_input"]
+            saved_status_data[note_key] = st.session_state[note_key]
             with open(DATA_FILE, "w") as f:
                 json.dump(saved_status_data, f)
             st.success("Changes and note saved!")
 
         if reset_click:
-            # Reset task status
             st.session_state.temp_status[selected_day] = [False] * len(tasks)
             saved_status_data[selected_day] = [False] * len(tasks)
-            
-            # Reset notes
-            saved_status_data[note_key] = ""
-            st.session_state["note_input"] = ""
-            
             with open(DATA_FILE, "w") as f:
                 json.dump(saved_status_data, f)
-
-            st.success(f"{selected_day} has been reset successfully!")
+            st.success(f"{selected_day} has been reset (tasks only)!")
             st.rerun()
 else:
     st.markdown("### No tasks today. Enjoy your time or take a break!")
