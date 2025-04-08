@@ -22,10 +22,9 @@ if not st.session_state.logged_in:
     st.stop()
 # ---------- End Login System ----------
 
-# بقیه برنامه همون نسخه‌ایه که دادی...
+# ---------- Main App ----------
 st.set_page_config(page_title="Weekly Plan", layout="wide")
 
-# جمله انگیزشی
 motivational_text = "“Push yourself, because no one else is going to do it for you.”"
 st.markdown(f"""
     <div style='
@@ -43,9 +42,6 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# باقی کدت بدون تغییر ادامه داره...
-
-
 DATA_FILE = "task_status.json"
 
 # Load or create status file
@@ -56,7 +52,6 @@ if not os.path.exists(DATA_FILE):
 with open(DATA_FILE, "r") as f:
     saved_status_data = json.load(f)
 
-# برنامه‌ی هفتگی
 days = ["Nothing", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 weekly_plan = {
     "Saturday": [
@@ -110,7 +105,7 @@ weekly_plan = {
     ]
 }
 
-# استایل
+# ---------- Style ----------
 st.markdown("""
     <style>
         .title {
@@ -124,17 +119,17 @@ st.markdown("""
             background-color: #2b2d42;
             padding: 1rem;
             border-radius: 12px;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
             color: #e0e0e0;
             font-weight: 500;
             font-size: 1.1rem;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
         .task-done {
             background-color: #007f5f !important;
             color: white !important;
-            pointer-events: none;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -146,26 +141,26 @@ selected_day = st.selectbox("Choose a day:", days)
 if selected_day != "Nothing":
     tasks = weekly_plan[selected_day]
 
-    # مقداردهی اولیه
     if selected_day not in saved_status_data:
         saved_status_data[selected_day] = [False] * len(tasks)
 
-    # کپی برای تغییرات موقت
     if "temp_status" not in st.session_state:
         st.session_state.temp_status = {}
     if selected_day not in st.session_state.temp_status:
         st.session_state.temp_status[selected_day] = saved_status_data[selected_day][:]
 
-    # نمایش تسک‌ها
     for i, task in enumerate(tasks):
-        if st.session_state.temp_status[selected_day][i]:
-            st.markdown(f'<div class="task-box task-done">{task}</div>', unsafe_allow_html=True)
-        else:
-            if st.button(f"✔️ {task}", key=f"{selected_day}_{i}"):
-                st.session_state.temp_status[selected_day][i] = True
+        status = st.session_state.temp_status[selected_day][i]
+        icon = "✅" if status else "☑️"
+        col1, col2 = st.columns([0.1, 0.9])
+        with col1:
+            if st.button(icon, key=f"btn_{selected_day}_{i}"):
+                st.session_state.temp_status[selected_day][i] = not status
                 st.rerun()
+        with col2:
+            box_class = "task-box task-done" if status else "task-box"
+            st.markdown(f'<div class="{box_class}">{task}</div>', unsafe_allow_html=True)
 
-        # نوت‌گذاری برای هر روز
     st.markdown("### Notes")
     note_key = f"{selected_day}_note"
     if note_key not in saved_status_data:
@@ -178,7 +173,6 @@ if selected_day != "Nothing":
         height=150
     )
 
-    # دکمه‌های Apply و Reset
     with st.form(key="action_form"):
         col1, col2 = st.columns(2)
         with col1:
@@ -205,7 +199,5 @@ if selected_day != "Nothing":
                 json.dump(saved_status_data, f)
             st.success(f"{selected_day} has been reset successfully!")
             st.rerun()
-
-
 else:
     st.markdown("### No tasks today. Enjoy your time or take a break!")
