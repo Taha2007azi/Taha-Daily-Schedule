@@ -145,9 +145,9 @@ if selected_day != "Nothing":
         saved_status_data[selected_day] = [False] * len(tasks)
 
 if "temp_status" not in st.session_state:
-        st.session_state.temp_status = {}
-    if selected_day not in st.session_state.temp_status:
-        st.session_state.temp_status[selected_day] = saved_status_data[selected_day][:]
+    st.session_state.temp_status = {}
+if selected_day not in st.session_state.temp_status:
+    st.session_state.temp_status[selected_day] = saved_status_data[selected_day][:]
 
     for i, task in enumerate(tasks):
         if st.session_state.temp_status[selected_day][i]:
