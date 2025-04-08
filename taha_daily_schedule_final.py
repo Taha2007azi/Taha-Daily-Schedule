@@ -42,9 +42,11 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 DATA_FILE = "task_status.json"
+
 if not os.path.exists(DATA_FILE):
     with open(DATA_FILE, "w") as f:
         json.dump({}, f)
+
 with open(DATA_FILE, "r") as f:
     saved_status_data = json.load(f)
 
@@ -101,7 +103,6 @@ weekly_plan = {
     ]
 }
 
-# ---------- Style ----------
 st.markdown("""
     <style>
         .title {
@@ -119,15 +120,21 @@ st.markdown("""
             color: #e0e0e0;
             font-weight: 500;
             font-size: 1.1rem;
-            transition: 0.2s;
+            transition: all 0.3s ease;
         }
         .task-box:hover {
-            background-color: #3d4059;
-            cursor: pointer;
+            background-color: #3d3f5c;
         }
         .task-done {
-            background-color: #006d77 !important;
-            color: #ffffff !important;
+            background-color: #009688 !important;
+            color: white !important;
+        }
+        button.task-button {
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            padding: 0;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -152,30 +159,15 @@ if selected_day != "Nothing":
         if st.session_state.temp_status[selected_day][i]:
             st.markdown(f'<div class="task-box task-done">{task}</div>', unsafe_allow_html=True)
         else:
-            if st.markdown(f'<a href="?clicked={key}" class="task-box">{task}</a>', unsafe_allow_html=True):
-                pass
+            if st.button(f"{task}", key=key):
+                st.session_state.temp_status[selected_day][i] = True
+                st.rerun()
 
-    # Check for task clicks via URL params
-    query_params = st.experimental_get_query_params()
-    clicked = query_params.get("clicked", [None])[0]
-    if clicked and clicked.startswith(selected_day):
-        idx = int(clicked.split("_")[1])
-        st.session_state.temp_status[selected_day][idx] = True
-        st.experimental_set_query_params()
-        st.rerun()
-
-    # ---------- Notes ----------
     st.markdown("### Notes")
     note_key = f"{selected_day}_note"
-    note_val = saved_status_data.get(note_key, "")
-    note_text = st.text_area(
-        "Write your daily report or notes here:",
-        value=note_val,
-        key=f"note_{selected_day}",
-        height=150
-    )
+    default_note = saved_status_data.get(note_key, "")
+    note_text = st.text_area("Write your daily report or notes here:", value=default_note, key=f"note_{selected_day}", height=150)
 
-    # ---------- Buttons ----------
     with st.form(key="action_form"):
         col1, col2 = st.columns(2)
         with col1:
@@ -194,6 +186,8 @@ if selected_day != "Nothing":
             st.session_state.temp_status[selected_day] = [False] * len(tasks)
             saved_status_data[selected_day] = [False] * len(tasks)
             saved_status_data[note_key] = ""
+            if f"note_{selected_day}" in st.session_state:
+                del st.session_state[f"note_{selected_day}"]
             with open(DATA_FILE, "w") as f:
                 json.dump(saved_status_data, f)
             st.success(f"{selected_day} has been reset successfully!")
