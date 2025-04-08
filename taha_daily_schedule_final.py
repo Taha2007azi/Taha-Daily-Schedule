@@ -3,34 +3,28 @@ import json
 import os
 
 # ---------- Login System ----------
-# تابع ورود با یوزرنیم و پسورد ساده
 def login():
     st.title("Login")
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
 
-    # بررسی اطلاعات ورود
     if st.button("Login"):
         if username == "taha2007azi" and password == "_20TaHa07_":
             st.session_state.logged_in = True
         else:
             st.error("Incorrect username or password.")
 
-# مقداردهی اولیه به وضعیت ورود
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
-# اگر هنوز وارد نشده، فرم ورود را نشان بده و اپ را متوقف کن
 if not st.session_state.logged_in:
     login()
     st.stop()
 # ---------- End Login System ----------
 
 # ---------- Main App ----------
-# تنظیمات کلی صفحه
 st.set_page_config(page_title="Weekly Plan", layout="wide")
 
-# نمایش جمله انگیزشی زیبا در بالای برنامه
 motivational_text = "“Push yourself, because no one else is going to do it for you.”"
 st.markdown(f"""
     <div style='
@@ -50,19 +44,15 @@ st.markdown(f"""
 
 DATA_FILE = "task_status.json"
 
-# اگر فایل ذخیره وجود نداشت، یک فایل جدید بساز
+# Load or create status file
 if not os.path.exists(DATA_FILE):
     with open(DATA_FILE, "w") as f:
         json.dump({}, f)
 
-# بارگذاری اطلاعات ذخیره‌شده از فایل
 with open(DATA_FILE, "r") as f:
     saved_status_data = json.load(f)
 
-# لیست روزها
 days = ["Nothing", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
-
-# برنامه هفتگی با تسک‌های مشخص برای هر روز
 weekly_plan = {
     "Saturday": [
         "05:00 – 05:30: Mind Clearing",
@@ -116,7 +106,6 @@ weekly_plan = {
 }
 
 # ---------- Style ----------
-# استایل‌های CSS برای طراحی کارت تسک‌ها و عنوان
 st.markdown("""
     <style>
         .title {
@@ -145,27 +134,21 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# نمایش عنوان برنامه
 st.markdown('<div class="title">Your Weekly Plan</div>', unsafe_allow_html=True)
 
-# انتخاب روز توسط کاربر
 selected_day = st.selectbox("Choose a day:", days)
 
-# اگر روز انتخاب شده است
 if selected_day != "Nothing":
     tasks = weekly_plan[selected_day]
 
-    # اگر داده‌ای ذخیره نشده بود، مقدار اولیه برای آن روز ایجاد کن
     if selected_day not in saved_status_data:
         saved_status_data[selected_day] = [False] * len(tasks)
 
-    # وضعیت تسک‌های فعلی در جلسه فعلی (برای تعامل بدون ذخیره‌سازی فوری)
     if "temp_status" not in st.session_state:
         st.session_state.temp_status = {}
     if selected_day not in st.session_state.temp_status:
         st.session_state.temp_status[selected_day] = saved_status_data[selected_day][:]
 
-    # نمایش تسک‌ها با دکمه‌ی انجام و تغییر رنگ در صورت انجام‌شدن
     for i, task in enumerate(tasks):
         if st.session_state.temp_status[selected_day][i]:
             st.markdown(f'<div class="task-box task-done">{task}</div>', unsafe_allow_html=True)
@@ -174,7 +157,6 @@ if selected_day != "Nothing":
                 st.session_state.temp_status[selected_day][i] = True
                 st.rerun()
 
-    # بخش یادداشت‌نویسی روزانه
     st.markdown("### Notes")
     note_key = f"{selected_day}_note"
     if note_key not in saved_status_data:
@@ -187,7 +169,6 @@ if selected_day != "Nothing":
         height=150
     )
 
-    # دکمه‌های ذخیره‌سازی یا بازنشانی وضعیت
     with st.form(key="action_form"):
         col1, col2 = st.columns(2)
         with col1:
@@ -195,7 +176,6 @@ if selected_day != "Nothing":
         with col2:
             reset_click = st.form_submit_button(label="❌ Reset")
 
-        # اگر دکمه Apply کلیک شد، داده‌ها ذخیره می‌شوند
         if apply_click:
             saved_status_data[selected_day] = st.session_state.temp_status[selected_day][:]
             saved_status_data[note_key] = st.session_state[note_key]
@@ -203,22 +183,15 @@ if selected_day != "Nothing":
                 json.dump(saved_status_data, f)
             st.success("Changes and note saved!")
 
-        # اگر Reset کلیک شد، همه چیز به حالت اول برمی‌گردد
         if reset_click:
             st.session_state.temp_status[selected_day] = [False] * len(tasks)
             saved_status_data[selected_day] = [False] * len(tasks)
             saved_status_data[note_key] = ""
-
-        # حذف کلید از session_state حتی اگر هنوز ساخته نشده
-    
             st.session_state[note_key] = ""
-
             with open(DATA_FILE, "w") as f:
                 json.dump(saved_status_data, f)
-
             st.success(f"{selected_day} has been reset successfully!")
             st.rerun()
-
 
 else:
     st.markdown("### No tasks today. Enjoy your time or take a break!")
