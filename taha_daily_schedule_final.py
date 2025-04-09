@@ -7,7 +7,6 @@ def login():
     st.title("Login")
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
-
     if st.button("Login"):
         if username == "taha2007azi" and password == "_20TaHa07_":
             st.session_state.logged_in = True
@@ -42,7 +41,6 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 DATA_FILE = "task_status.json"
-
 if not os.path.exists(DATA_FILE):
     with open(DATA_FILE, "w") as f:
         json.dump({}, f)
@@ -103,7 +101,6 @@ weekly_plan = {
     ]
 }
 
-# ---------- Style ----------
 st.markdown("""
     <style>
         .title {
@@ -132,33 +129,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# ---------- ویرایش برنامه روزانه ----------
-st.markdown("### ✏️ Edit My Daily Plan")
-
-edit_day = st.selectbox("Select a day to edit:", [day for day in weekly_plan])
-edited_tasks = st.session_state.get(f"{edit_day}_edited_tasks", weekly_plan[edit_day][:])
-task_inputs = []
-
-for idx, task in enumerate(edited_tasks):
-    new_task = st.text_input(f"Task {idx+1}", value=task, key=f"edit_{edit_day}_{idx}")
-    task_inputs.append(new_task)
-
-if st.button("➕ Add New Task"):
-    task_inputs.append("")
-    st.session_state[f"{edit_day}_edited_tasks"] = task_inputs
-    st.experimental_rerun()
-
-if st.button("💾 Save Changes"):
-    weekly_plan[edit_day] = task_inputs
-    st.session_state[f"{edit_day}_edited_tasks"] = task_inputs
-    saved_status_data[edit_day] = [False] * len(task_inputs)
-    with open(DATA_FILE, "w") as f:
-        json.dump(saved_status_data, f)
-    st.success(f"Plan for {edit_day} updated!")
-    st.experimental_rerun()
-
-# ---------- نمایش برنامه روزانه ----------
 st.markdown('<div class="title">Your Weekly Plan</div>', unsafe_allow_html=True)
+
 selected_day = st.selectbox("Choose a day:", days)
 
 if selected_day != "Nothing":
@@ -173,6 +145,8 @@ if selected_day != "Nothing":
         st.session_state.temp_status[selected_day] = saved_status_data[selected_day][:]
 
     for i, task in enumerate(tasks):
+        if i >= len(st.session_state.temp_status[selected_day]):
+            st.session_state.temp_status[selected_day].append(False)
         if st.session_state.temp_status[selected_day][i]:
             st.markdown(f'<div class="task-box task-done">{task}</div>', unsafe_allow_html=True)
         else:
@@ -180,6 +154,30 @@ if selected_day != "Nothing":
                 st.session_state.temp_status[selected_day][i] = True
                 st.rerun()
 
+    # ---------- Editable Tasks Section ----------
+    with st.expander("✏️ Edit This Day's Tasks"):
+        editable_tasks = weekly_plan[selected_day]
+        new_task_list = []
+
+        for idx, task in enumerate(editable_tasks):
+            edited_task = st.text_input(f"Task {idx+1}:", value=task, key=f"{selected_day}_edit_{idx}")
+            new_task_list.append(edited_task)
+
+        new_task = st.text_input("➕ Add New Task:", key=f"{selected_day}_add_new")
+        if new_task:
+            new_task_list.append(new_task)
+
+        if st.button("💾 Save Changes", key=f"{selected_day}_save_changes"):
+            weekly_plan[selected_day] = new_task_list
+            st.session_state.temp_status[selected_day] = [False] * len(new_task_list)
+            saved_status_data[selected_day] = [False] * len(new_task_list)
+            with open(DATA_FILE, "w") as f:
+                json.dump(saved_status_data, f)
+            st.success(f"{selected_day} plan updated!")
+            st.rerun()
+    # ---------- End Editable Tasks ----------
+
+    # ---------- Notes Section ----------
     st.markdown("### Notes")
     note_key = f"{selected_day}_note"
     if note_key not in saved_status_data:
@@ -207,8 +205,8 @@ if selected_day != "Nothing":
             st.success("Changes and note saved!")
 
         if reset_click:
-            st.session_state.temp_status[selected_day] = [False] * len(tasks)
-            saved_status_data[selected_day] = [False] * len(tasks)
+            st.session_state.temp_status[selected_day] = [False] * len(weekly_plan[selected_day])
+            saved_status_data[selected_day] = [False] * len(weekly_plan[selected_day])
             saved_status_data[note_key] = " "
             if note_key in st.session_state:
                 del st.session_state[note_key]
@@ -216,5 +214,6 @@ if selected_day != "Nothing":
                 json.dump(saved_status_data, f)
             st.success(f"{selected_day} has been reset (tasks and note)!")
             st.rerun()
+
 else:
     st.markdown("### No tasks today. Enjoy your time or take a break!")
