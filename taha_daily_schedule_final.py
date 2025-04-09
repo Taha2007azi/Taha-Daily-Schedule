@@ -103,6 +103,7 @@ weekly_plan = {
     ]
 }
 
+# ---------- Style ----------
 st.markdown("""
     <style>
         .title {
@@ -131,8 +132,33 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="title">Your Weekly Plan</div>', unsafe_allow_html=True)
+# ---------- ویرایش برنامه روزانه ----------
+st.markdown("### ✏️ Edit My Daily Plan")
 
+edit_day = st.selectbox("Select a day to edit:", [day for day in weekly_plan])
+edited_tasks = st.session_state.get(f"{edit_day}_edited_tasks", weekly_plan[edit_day][:])
+task_inputs = []
+
+for idx, task in enumerate(edited_tasks):
+    new_task = st.text_input(f"Task {idx+1}", value=task, key=f"edit_{edit_day}_{idx}")
+    task_inputs.append(new_task)
+
+if st.button("➕ Add New Task"):
+    task_inputs.append("")
+    st.session_state[f"{edit_day}_edited_tasks"] = task_inputs
+    st.experimental_rerun()
+
+if st.button("💾 Save Changes"):
+    weekly_plan[edit_day] = task_inputs
+    st.session_state[f"{edit_day}_edited_tasks"] = task_inputs
+    saved_status_data[edit_day] = [False] * len(task_inputs)
+    with open(DATA_FILE, "w") as f:
+        json.dump(saved_status_data, f)
+    st.success(f"Plan for {edit_day} updated!")
+    st.experimental_rerun()
+
+# ---------- نمایش برنامه روزانه ----------
+st.markdown('<div class="title">Your Weekly Plan</div>', unsafe_allow_html=True)
 selected_day = st.selectbox("Choose a day:", days)
 
 if selected_day != "Nothing":
@@ -190,6 +216,5 @@ if selected_day != "Nothing":
                 json.dump(saved_status_data, f)
             st.success(f"{selected_day} has been reset (tasks and note)!")
             st.rerun()
-
 else:
     st.markdown("### No tasks today. Enjoy your time or take a break!")
