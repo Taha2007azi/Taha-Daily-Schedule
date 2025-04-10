@@ -166,6 +166,13 @@ if selected_day != "Nothing":
         new_task = st.text_input("➕ Add New Task:", key=f"{selected_day}_add_new")
         if new_task:
             new_task_list.append(new_task)
+            # Save the new task to the data file
+            weekly_plan[selected_day] = new_task_list
+            saved_status_data[selected_day] = [False] * len(new_task_list)
+            with open(DATA_FILE, "w") as f:
+                json.dump(saved_status_data, f)
+            st.success(f"{selected_day} plan updated!")
+            st.rerun()
 
         if st.button("💾 Save Changes", key=f"{selected_day}_save_changes"):
             weekly_plan[selected_day] = new_task_list
