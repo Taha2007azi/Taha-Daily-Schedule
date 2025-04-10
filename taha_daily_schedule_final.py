@@ -1,119 +1,80 @@
 import streamlit as st
-import json
-import os
-from datetime import datetime
 
-# File paths
-PLAN_FILE = "weekly_plan.json"
-STATUS_FILE = "task_status.json"
+st.set_page_config(page_title="Custom Weekly Planner", layout="wide")
 
-# Default plan if no file exists
-default_plan = {
-    "Saturday": ["Study Math", "Study Physics"],
-    "Sunday": ["Study Chemistry", "Revise Math"],
-    "Monday": ["Biology Homework", "Watch Physics Lecture"],
-    "Tuesday": ["Review Notes", "Practice Problems"],
-    "Wednesday": ["Group Study", "Online Quiz"],
-    "Thursday": ["Rest", "Plan Next Week"],
-    "Friday": ["Programming Class"]
-}
+# رنگ‌بندی خفن
+base_color = "#2E3B4E"
+active_color = "#4A90E2"
+done_color = "#3DDC84"
+text_color = "#F5F5F5"
 
-# Load or initialize weekly plan
-if not os.path.exists(PLAN_FILE):
-    with open(PLAN_FILE, "w") as f:
-        json.dump(default_plan, f)
+st.markdown(f"""
+    <style>
+    .block {{
+        background-color: {base_color};
+        padding: 10px;
+        border-radius: 12px;
+        margin-bottom: 8px;
+        color: {text_color};
+    }}
+    </style>
+""", unsafe_allow_html=True)
 
-with open(PLAN_FILE, "r") as f:
-    weekly_plan = json.load(f)
+st.title("Custom Weekly Planner")
 
-# Load or initialize status
-if os.path.exists(STATUS_FILE):
-    with open(STATUS_FILE, "r") as f:
-        task_status = json.load(f)
-else:
-    task_status = {}
+# لیست روزها
+days = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 
-# Initialize session state
-if 'done_tasks' not in st.session_state:
-    st.session_state.done_tasks = []
+# حالت‌های سشن
+if "plan" not in st.session_state:
+    st.session_state.plan = {day: [] for day in days}
 
-if 'notes' not in st.session_state:
-    st.session_state.notes = {}
-
-if 'show_done' not in st.session_state:
-    st.session_state.show_done = False
-
-# Add new task form
-st.sidebar.subheader("Add New Task")
+# فرم اضافه‌کردن تسک
+st.sidebar.subheader("Add Task Manually")
 with st.sidebar.form("add_task_form"):
-    selected_day = st.selectbox("Select Day", list(weekly_plan.keys()))
-    new_task = st.text_input("New Task")
-    submitted = st.form_submit_button("Save")
+    selected_day = st.selectbox("Select Day", days)
+    new_task = st.text_input("Enter Task")
+    submitted = st.form_submit_button("Add Task")
     if submitted and new_task.strip():
-        weekly_plan[selected_day].append(new_task.strip())
-        with open(PLAN_FILE, "w") as f:
-            json.dump(weekly_plan, f)
-        st.success(f"Added task '{new_task}' to {selected_day}")
-        st.rerun()
+        st.session_state.plan[selected_day].append({
+            "title": new_task.strip(),
+            "check1": False,
+            "check2": False,
+            "note": ""
+        })
+        st.success(f"Task added to {selected_day}")
 
-st.title("Taha's Weekly Planner")
-
-# Display weekly plan
-for day, tasks in weekly_plan.items():
+# نمایش برنامه‌ی ساخته‌شده
+for day in days:
     with st.expander(day):
-        for task in tasks:
-            task_id = f"{day}_{task}"
-            status = task_status.get(task_id, {"check1": False, "check2": False})
+        for i, task in enumerate(st.session_state.plan[day]):
+            task_key = f"{day}_{i}"
+            col1, col2, col3 = st.columns([1, 1, 6])
 
-            if status["check2"]:
-                st.session_state.done_tasks.append(task_id)
-                continue
-
-            col1, col2, col3 = st.columns([1, 1, 5])
             with col1:
-                new_check1 = st.checkbox("✔1", key=f"{task_id}_1", value=status["check1"])
+                task["check1"] = st.checkbox("✔1", value=task["check1"], key=f"{task_key}_1")
             with col2:
-                new_check2 = False
-                if new_check1:
-                    new_check2 = st.checkbox("✔2", key=f"{task_id}_2", value=status["check2"])
-
+                if task["check1"]:
+                    task["check2"] = st.checkbox("✔2", value=task["check2"], key=f"{task_key}_2")
             with col3:
-                color = "#B0C4DE"  # default
-                if new_check2:
-                    color = "#90EE90"
-                elif new_check1:
-                    color = "#ADD8E6"
+                if task["check2"]:
+                    block_color = done_color
+                elif task["check1"]:
+                    block_color = active_color
+                else:
+                    block_color = base_color
 
                 st.markdown(f"""
-                    <div style='background-color: {color}; padding: 10px; border-radius: 10px;'>
-                        <strong>{task}</strong>
+                    <div class="block" style="background-color:{block_color};">
+                        <strong>{task['title']}</strong>
                     </div>
                 """, unsafe_allow_html=True)
 
-            note_key = f"note_{task_id}"
-            note = st.text_area("Note", value=st.session_state.notes.get(task_id, ""), key=note_key)
-            st.session_state.notes[task_id] = note
+            # یادداشت
+            task["note"] = st.text_area("Note", value=task["note"], key=f"{task_key}_note")
 
-            # Update status
-            task_status[task_id] = {"check1": new_check1, "check2": new_check2}
-
-# Save task statuses
-with open(STATUS_FILE, "w") as f:
-    json.dump(task_status, f)
-
-# Done tasks list
-st.sidebar.subheader("Done Tasks")
-if st.sidebar.button("Show/Hide Done Tasks"):
-    st.session_state.show_done = not st.session_state.show_done
-
-if st.session_state.show_done:
-    for task_id in st.session_state.done_tasks:
-        st.sidebar.write(task_id)
-
-# Reset and Apply buttons
+# دکمه ریست
 st.sidebar.subheader("Actions")
-if st.sidebar.button("Reset All"):
-    st.session_state.clear()
-    if os.path.exists(STATUS_FILE):
-        os.remove(STATUS_FILE)
+if st.sidebar.button("Reset Planner"):
+    st.session_state.plan = {day: [] for day in days}
     st.experimental_rerun()
