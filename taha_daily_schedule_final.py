@@ -1,80 +1,74 @@
+# Taha Energy Plan - Streamlit App (Daily Planner)
+
 import streamlit as st
+import datetime
 
-st.set_page_config(page_title="Custom Weekly Planner", layout="wide")
+st.set_page_config(page_title="Taha Energy Plan", layout="wide")
 
-# رنگ‌بندی خفن
-base_color = "#2E3B4E"
-active_color = "#4A90E2"
-done_color = "#3DDC84"
-text_color = "#F5F5F5"
-
-st.markdown(f"""
+# --- Custom CSS for style ---
+st.markdown("""
     <style>
-    .block {{
-        background-color: {base_color};
-        padding: 10px;
-        border-radius: 12px;
-        margin-bottom: 8px;
-        color: {text_color};
-    }}
+        .title {
+            font-size: 40px;
+            color: #89CFF0;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .done {
+            background-color: #1f1f1f;
+            color: #90ee90;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 5px 0;
+        }
+        .task-box {
+            background-color: #2e2e2e;
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+        }
+        .blur-button button {
+            backdrop-filter: blur(10px);
+            border-radius: 10px !important;
+        }
     </style>
 """, unsafe_allow_html=True)
 
-st.title("Custom Weekly Planner")
+st.markdown('<div class="title">Taha Energy Plan</div>', unsafe_allow_html=True)
 
-# لیست روزها
-days = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+# --- Task Blocks ---
+def task_block(label, key_prefix):
+    with st.container():
+        st.markdown("<div class='task-box'>", unsafe_allow_html=True)
+        check1 = st.checkbox(f"[Check 1] {label}", key=f"{key_prefix}_check1")
+        if check1:
+            check2 = st.checkbox(f"[Check 2] Confirm done - {label}", key=f"{key_prefix}_check2")
+            if check2:
+                st.markdown(f"<div class='done'>✅ {label} - Completed</div>", unsafe_allow_html=True)
+        note = st.text_area(f"Note for {label}", key=f"{key_prefix}_note")
+        st.markdown("</div>", unsafe_allow_html=True)
 
-# حالت‌های سشن
-if "plan" not in st.session_state:
-    st.session_state.plan = {day: [] for day in days}
+# --- Tasks of the Day ---
 
-# فرم اضافه‌کردن تسک
-st.sidebar.subheader("Add Task Manually")
-with st.sidebar.form("add_task_form"):
-    selected_day = st.selectbox("Select Day", days)
-    new_task = st.text_input("Enter Task")
-    submitted = st.form_submit_button("Add Task")
-    if submitted and new_task.strip():
-        st.session_state.plan[selected_day].append({
-            "title": new_task.strip(),
-            "check1": False,
-            "check2": False,
-            "note": ""
-        })
-        st.success(f"Task added to {selected_day}")
+schedule = [
+    ("5:00 - 5:15 | Wake up + Music (Chill)", "wake"),
+    ("5:15 - 6:00 | Mental reset + stretch + language", "reset"),
+    ("6:00 - 6:30 | Breakfast + prepare", "breakfast"),
+    ("6:45 | Go to school", "school_go"),
+    ("7:00 - 15:00 | School Time", "school"),
+    ("15:00 - 16:00 | Rest + chill", "rest"),
+    ("16:00 - 18:30 | Light Konkoor Study (Pomodoro style)", "konkoor1"),
+    ("18:30 - 19:30 | VRTC Language Class", "language_class"),
+    ("19:30 - 20:30 | Dinner + relax", "dinner"),
+    ("20:30 - 22:00 | Konkoor or light AI work (video, light coding)", "konkoor2"),
+    ("22:00 - 23:30 | Reflect + plan tomorrow", "reflect")
+]
 
-# نمایش برنامه‌ی ساخته‌شده
-for day in days:
-    with st.expander(day):
-        for i, task in enumerate(st.session_state.plan[day]):
-            task_key = f"{day}_{i}"
-            col1, col2, col3 = st.columns([1, 1, 6])
+for task, key in schedule:
+    task_block(task, key)
 
-            with col1:
-                task["check1"] = st.checkbox("✔1", value=task["check1"], key=f"{task_key}_1")
-            with col2:
-                if task["check1"]:
-                    task["check2"] = st.checkbox("✔2", value=task["check2"], key=f"{task_key}_2")
-            with col3:
-                if task["check2"]:
-                    block_color = done_color
-                elif task["check1"]:
-                    block_color = active_color
-                else:
-                    block_color = base_color
-
-                st.markdown(f"""
-                    <div class="block" style="background-color:{block_color};">
-                        <strong>{task['title']}</strong>
-                    </div>
-                """, unsafe_allow_html=True)
-
-            # یادداشت
-            task["note"] = st.text_area("Note", value=task["note"], key=f"{task_key}_note")
-
-# دکمه ریست
-st.sidebar.subheader("Actions")
-if st.sidebar.button("Reset Planner"):
-    st.session_state.plan = {day: [] for day in days}
-    st.experimental_rerun()
+# --- End of Day Mood/Note ---
+st.markdown("<hr>", unsafe_allow_html=True)
+st.subheader("How did you feel today?")
+st.text_area("Write about your mood, wins, or anything on your mind:", key="daily_feeling")
